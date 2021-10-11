@@ -191,12 +191,12 @@ if [ "$action_name" = "down" ] && [ "$drag_status" = $no_drag ]; then
     t_drag_status_set "$new_value"
 
 elif [ "$action_name" = "up" ]; then
+    debug ">> up drag_status [$drag_status]  mouse_x [$mouse_x]"
     t_drag_status_set "$no_drag"  # reset it even if we dont move windows
-    debug ">> up mouse_x [$mouse_x]"
     [ -f "$drag_status_cache" ] && rm "$drag_status_cache"
     if [ $drag_status = $single_window ]; then
 	exit 0
-    elif [ "$mouse_x" -lt $drag_status ]; then
+    elif [ "$mouse_x" -lt "$drag_status" ]; then
 	debug "will switch to the left"
 	tmux select-window -p
     else
