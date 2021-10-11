@@ -91,6 +91,7 @@ debug() {
 
 
 t_drag_status_set() {
+    debug ">> t_drag_status_set($1)"
     if [ -f "$drag_status_cache" ]; then
 	return
     else
@@ -103,11 +104,12 @@ t_drag_status_set() {
 
 t_drag_status_get() {
     mouse_x="$1"
+    debug "t_drag_status_get($mouse_x)"
     if [ -f "$drag_status_cache" ]; then
 	#debug ">> reading $drag_status_cache"
 	drag_status="$(cat $drag_status_cache)"
     else
-	debug "t_drag_status_get($mouse_x)"
+	debug ">> reading from tmux"
 	ds_prel="$(tmux show -s @mouse_drag_status)"
 	drag_status="$(echo "$ds_prel"|cut -d' ' -f 2)"
 	t_drag_status_set "$mouse_x"
