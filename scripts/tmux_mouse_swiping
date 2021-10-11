@@ -93,9 +93,9 @@ debug() {
 t_drag_status_set() {
     debug ">> t_drag_status_set($1)"
     if [ -f "$drag_status_cache" ]; then
+	debug ">> t_drag_status_set() aborting due to cache present"
 	return
     else
-	debug ">> t_drag_status_set($1)"
 	echo "$1" > "$drag_status_cache"
     fi
     #tmux set-option -s @mouse_drag_status "$1"
