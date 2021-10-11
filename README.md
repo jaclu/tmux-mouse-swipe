@@ -4,7 +4,7 @@ Right click and swipe left or right in any pane to switch window in that directi
 
 ## Installation
 
-This needs tmux vers 3.0 or higher!
+Compatability: tmux version 3.0 or higher
 
 ### Installation with [Tmux Plugin Manager](https://github.com/tmux-plugins/tpm) (recommended)
 
@@ -43,6 +43,7 @@ Once installed, try pressing down right button and swipe left or right on any pa
 Once you release the button, tmux should move one window in that direction.
 
 ### Performance
+
 Please note the plugin will be called each time the mouse moves another char, 
 so on really slow systems, there might be some lag between letting go of the button 
 and the windows switch to occur.
