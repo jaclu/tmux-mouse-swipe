@@ -181,7 +181,7 @@ if [ "$drag_status" -lt "1" ]; then
     env_check
 fi
      
-#debug "action: [$action_name]  drag start: [$drag_status]  mouse x: [$mouse_x]"
+debug "action: [$action_name]  drag start: [$drag_status]  mouse x: [$mouse_x]"
 
 if [ "$action_name" = "down" ] && [ "$drag_status" = $no_drag ]; then
     windows="$(tmux list-windows -F '#{window_id}' | wc -l)"
