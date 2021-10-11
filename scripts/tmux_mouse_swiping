@@ -108,6 +108,7 @@ t_drag_status_get() {
     if [ -f "$drag_status_cache" ]; then
 	#debug ">> reading $drag_status_cache"
 	drag_status="$(cat $drag_status_cache)"
+	debug ">> get read from cache: [$drag_status]"
     else
 	debug ">> reading from tmux"
 	ds_prel="$(tmux show -s @mouse_drag_status)"
