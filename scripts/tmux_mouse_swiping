@@ -1,5 +1,5 @@
 #!/bin/sh
-__version="1.2.1 2021-10-11"
+__version="1.3.0 2021-10-12"
 #
 #   Copyright (c) 2021: Jacob.Lundqvist@gmail.com for date see __version above
 #   License: MIT
@@ -7,6 +7,8 @@ __version="1.2.1 2021-10-11"
 #   Part of https://github.com/jaclu/tmux_common
 #
 #   Version: $__version
+#       lot of cleanup and improved handle_up to make sure there was sideways motion
+#     1.2.1 2021-10-11
 #       corrected single window display-message to use simpler params for vers < 3.2
 #     1.2.0 2021-10-11
 #       Reworked logic to better detect invalid conditions, and
@@ -152,7 +154,9 @@ handle_up() {
     if [ "$mouse_x" -lt "$prev_drag_status" ]; then
 	debug "will switch to the left"
 	tmux select-window -p
-    else
+    elif [ "$mouse_x" -gt "$prev_drag_status" ]; then
+	# second check ensures no window switch if right button is clicked
+	# and no sideways motion is detected
 	debug "will switch to the right"
 	tmux select-window -n
     fi
