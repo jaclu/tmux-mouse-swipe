@@ -159,6 +159,8 @@ handle_up() {
 	# and no sideways motion is detected
 	debug "will switch to the right"
 	tmux select-window -n
+    else
+	tmux display-message "tmux-mouse-swipe did not detect any horizontal movement!"
     fi
 }
 
