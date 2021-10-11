@@ -1,0 +1,206 @@
+#!/bin/sh
+__version="1.1.2 2021-10-11"
+#
+#   Copyright (c) 2021: Jacob.Lundqvist@gmail.com for date see __version above
+#   License: MIT
+#
+#   Part of https://github.com/jaclu/tmux_common
+#
+#   Version: $__version
+#       Some further tweaks to optimize performance on slow systems
+#     1.1.1 2021-10-11
+#       using cache file for status to reduce lag on slow systems
+#     1.1.0 2021-10-11
+#       Made comparison compliant with shellcheck recomendations
+#     1.0.6 2021-09-29"
+#       Udpdated info when detected tmux version is < 3.0
+#     1.0.5 2021-09-28"
+#       Initial deploy
+#
+#   This enables changing tmux window by pressing the right button
+#   then left - right swiping to indicate requested direction.
+#
+app_name="tmux_mouse_swiping"
+
+
+#
+#   Tmux only keeps track of mouse_x inside panes
+#   If you are depending on right click swipes in your apps,
+#   then this utility might not be for you.
+#
+#   remember to uncomment the tmux commands below
+#   when you copy it to tmux.conf
+#   
+#   They have to be commented out here, so that bash doesnt try
+#   to execute. However tmux should :)
+#
+
+# =====  The section between theese should go into .tmux.conf  =====
+
+#
+#   This enables changing tmux window by pressing the right button
+#   then left - right swiping to indicate requested direction.
+#
+#set-option -s @mouse_drag_status "untested"
+#bind-key -n MouseDrag3Pane    run "/usr/local/bin/tmux_mouse_swiping down \'#{mouse_x}\'"
+#bind-key -n MouseDragEnd3Pane run "/usr/local/bin/tmux_mouse_swiping up   \'#{mouse_x}\'"
+#
+# This normally triggers the right click default popups, they dont
+# play well when we use right clicks for other purposes.
+#unbind-key -n MouseDown3Pane # diable since it interferes with our stuff
+
+# =====  The section between theese should go into .tmux.conf  =====
+
+
+#
+#   Values for mouse_drag_status:
+#
+#   untested - script has not verified if this tmux is compatible
+#   incompat - script has decided it is not compatible
+#   -1       - drag initiated but only one window, so no switch will happen
+#    0       - no drag in progress
+#   >0       - x pos when event started, when button is released it will be
+#              compared to current x pos to decide window switch direction.
+#              It will always be reset to 0, even if it was -1
+
+
+action_name="$1"
+mouse_x="$2"
+
+# VERSION_LIMIT
+# ok 3.0
+#    2.9a no mouse_x support, so limited functionality,
+#            always swiping the same direction
+#    2.1  no suppoer for MouseDragEnd3Pane, using MouseUp3 instead doesn't help
+#    2.2  is the lowest version with even limited useability.
+
+min_version="3.0" # 2.2 for limited functionality
+
+env_untested='"untested"'
+env_incompatible="incompat"
+single_window=-1
+no_drag=0
+drag_status_cache="/tmp/drag_status_cache"
+log_file="/tmp/tmux_mouse_swiping.log"
+
+
+debug() {
+    #return # uncomment if you want to see a log of what is happening
+    echo "$(date) $1" >> $log_file
+}
+
+
+t_drag_status_set() {
+    if [ -f "$drag_status_cache" ]; then
+	return
+    else
+	debug ">> t_drag_status_set($1)"
+	echo "$1" > "$drag_status_cache"
+    fi
+    #tmux set-option -s @mouse_drag_status "$1"
+}
+
+
+t_drag_status_get() {
+    mouse_x="$1"
+    if [ -f "$drag_status_cache" ]; then
+	#debug ">> reading $drag_status_cache"
+	drag_status="$(cat $drag_status_cache)"
+    else
+	debug "t_drag_status_get($mouse_x)"
+	ds_prel="$(tmux show -s @mouse_drag_status)"
+	drag_status="$(echo "$ds_prel"|cut -d' ' -f 2)"
+	t_drag_status_set "$mouse_x"
+	debug ">> writing $mouse_x to $drag_status_cache"
+	echo "$mouse_x" > "$drag_status_cache"
+    fi
+}
+
+
+incompatible_env() {
+    msg="$1"
+    if [ "$drag_status" != $env_incompatible ]; then
+	echo " "
+	echo "$app_name vers: $__version Detected an incompatible environment, and is now disabled"
+	echo "Details should be bellow, press Escape when you have read this."
+	echo "If you want to use this with limited functionality, change │min_version in this script"
+	echo "acordingly."
+	echo " "
+	drag_status=$env_incompatible
+	t_drag_status_set "$drag_status"
+    fi
+    debug "***Incompatability: $msg"
+    echo "$msg"
+}
+
+
+env_check() {
+    vers="$(tmux -V |cut -d' ' -f 2)" # extra for debug, remove soon!
+    debug ">> env_check() tmux Vers[$vers] drag_status[$drag_status] untested[$env_untested] incompat[$env_incompatible]"
+    if [ "$drag_status" = "$env_incompatible" ]; then
+	exit 0
+    elif [ "$drag_status" = "$env_untested" ]; then
+	#debug ">>ec 1.2"
+	vers="$(tmux -V |cut -d' ' -f 2)"
+	if [ -z "$vers" ]; then
+	    #debug ">>ec 1.2.1"
+	    incompatible_env "Can not detect the running tmux version, this tool neeeds at least tmux vers: $min_version"
+	    incompatible_env "Since it can't be detected to not be compatible, it will now be activated, but no guarantee it will work."
+	    drag_status=$no_drag
+	    return
+	fi
+	if echo "$vers < 3.0" | bc ; then
+	    #debug ">>ec 1.3.1"
+	    incompatible_env "vers < 3.0 no mouse_x support, so this utility can not work properly"
+	fi
+	#debug ">>ec 1.5"
+	if echo "$vers < $min_version" | bc ; then
+	    #debug ">>ec 1.5.1"
+	    t_drag_status_set $env_incompatible
+	    incompatible_env "tmux $vers < min vers: $min_version"
+	    exit 0
+	fi
+	drag_status=$no_drag
+    fi
+    #debug ">>ec returning"
+}
+
+
+
+#================================================================
+#
+#   Main
+#
+
+t_drag_status_get "$mouse_x"
+
+if [ "$drag_status" -lt "1" ]; then
+    env_check
+fi
+     
+#debug "action: [$action_name]  drag start: [$drag_status]  mouse x: [$mouse_x]"
+
+if [ "$action_name" = "down" ] && [ "$drag_status" = $no_drag ]; then
+    windows="$(tmux list-windows -F '#{window_id}' | wc -l)"
+    if [ "$windows" -lt 2 ]; then
+	tmux display-message -N -d 1000 "Only 1 window, can't switch"
+	new_value=$single_window # block window switch 
+    else
+	new_value="$mouse_x"  #  Start drag detected
+    fi
+    t_drag_status_set "$new_value"
+
+elif [ "$action_name" = "up" ]; then
+    t_drag_status_set "$no_drag"  # reset it even if we dont move windows
+    [ -f "$drag_status_cache" ] && rm "$drag_status_cache"
+    if [ $drag_status = $single_window ]; then
+	exit 0
+    elif [ "$mouse_x" -lt $drag_status ]; then
+	debug "will switch to the left"
+	tmux select-window -p
+    else
+	debug "will switch to the right"
+	tmux select-window -n
+    fi
+fi
+
