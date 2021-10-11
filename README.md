@@ -4,6 +4,8 @@ Right click and swipe left or right in any pane to switch window in that directi
 
 ## Installation
 
+This needs tmux vers 3.0 or higher!
+
 ### Installation with [Tmux Plugin Manager](https://github.com/tmux-plugins/tpm) (recommended)
 
 Add plugin to the list of TPM plugins in `.tmux.conf`:
