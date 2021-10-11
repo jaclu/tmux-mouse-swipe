@@ -1,5 +1,5 @@
 #!/bin/sh
-__version="1.1.2 2021-10-11"
+__version="1.2.0 2021-10-11"
 #
 #   Copyright (c) 2021: Jacob.Lundqvist@gmail.com for date see __version above
 #   License: MIT
@@ -7,6 +7,9 @@ __version="1.1.2 2021-10-11"
 #   Part of https://github.com/jaclu/tmux_common
 #
 #   Version: $__version
+#       Reworked logic to better detect invalid conditions, and
+#       to deal with them.
+#     1.1.2 2021-10-11
 #       Some further tweaks to optimize performance on slow systems
 #     1.1.1 2021-10-11
 #       using cache file for status to reduce lag on slow systems
@@ -76,7 +79,7 @@ mouse_x="$2"
 
 min_version="3.0" # 2.2 for limited functionality
 
-env_untested='"untested"'
+env_untested="untested"
 env_incompatible="incompat"
 single_window=-1
 no_drag=0
@@ -91,11 +94,8 @@ debug() {
 
 
 t_drag_status_set() {
-    if [ -f "$drag_status_cache" ]; then
-	return
-    else
-	echo "$1" > "$drag_status_cache"
-    fi
+    echo "$1" > "$drag_status_cache"
+    drag_status="$1"
     #tmux set-option -s @mouse_drag_status "$1"
 }
 
@@ -107,8 +107,6 @@ t_drag_status_get() {
     else
 	ds_prel="$(tmux show -s @mouse_drag_status)"
 	drag_status="$(echo "$ds_prel"|cut -d' ' -f 2)"
-	t_drag_status_set "$mouse_x"
-	echo "$mouse_x" > "$drag_status_cache"
     fi
 }
 
@@ -132,26 +130,35 @@ incompatible_env() {
 
 env_check() {
     vers="$(tmux -V |cut -d' ' -f 2)" # extra for debug, remove soon!
+    t_drag_status_get "$mouse_x"
     if [ "$drag_status" = "$env_incompatible" ]; then
+	echo "env incompatible"
 	exit 0
     elif [ "$drag_status" = "$env_untested" ]; then
-	vers="$(tmux -V |cut -d' ' -f 2)"
 	if [ -z "$vers" ]; then
 	    incompatible_env "Can not detect the running tmux version, this tool neeeds at least tmux vers: $min_version"
 	    incompatible_env "Since it can't be detected to not be compatible, it will now be activated, but no guarantee it will work."
-	    drag_status=$no_drag
+	    t_drag_status_set "$no_drag"
 	    return
 	fi
-	if echo "$vers < 3.0" | bc ; then
+	if  expr "'$vers" \< "'3.0"   > /dev/null ; then
 	    incompatible_env "vers < 3.0 no mouse_x support, so this utility can not work properly"
 	fi
-	if echo "$vers < $min_version" | bc ; then
-	    t_drag_status_set $env_incompatible
+	if  expr "'$vers" \< "'$min_version"   > /dev/null ; then
+	    #t_drag_status_set $env_incompatible
 	    incompatible_env "tmux $vers < min vers: $min_version"
 	    exit 0
 	fi
 	drag_status=$no_drag
     fi
+    windows="$(tmux list-windows -F '#{window_id}' | wc -l)"
+    if [ "$windows" -lt 2 ]; then
+	tmux display-message -N -d 1500 "Only 1 window, can't switch"
+	drag_status=$single_window # block window switch
+    else
+	drag_status="$mouse_x"  #  Start drag detected
+    fi
+    t_drag_status_set "$drag_status"
 }
 
 
@@ -163,28 +170,32 @@ env_check() {
 
 t_drag_status_get "$mouse_x"
 
-if [ "$drag_status" -lt "1" ]; then
+if [ "$drag_status" = "$env_untested" ]; then
     env_check
 fi
      
-# debug "action: [$action_name]  drag start: [$drag_status]  mouse x: [$mouse_x]"
+#debug "action: [$action_name]  drag start: [$drag_status]  mouse x: [$mouse_x]"
 
 if [ "$action_name" = "down" ] && [ "$drag_status" = $no_drag ]; then
-    windows="$(tmux list-windows -F '#{window_id}' | wc -l)"
-    if [ "$windows" -lt 2 ]; then
-	tmux display-message -N -d 1000 "Only 1 window, can't switch"
-	new_value=$single_window # block window switch 
-    else
-	new_value="$mouse_x"  #  Start drag detected
-    fi
     t_drag_status_set "$new_value"
 
 elif [ "$action_name" = "up" ]; then
-    t_drag_status_set "$no_drag"  # reset it even if we dont move windows
-    [ -f "$drag_status_cache" ] && rm "$drag_status_cache"
-    if [ $drag_status = $single_window ]; then
-	exit 0
-    elif [ "$mouse_x" -lt "$drag_status" ]; then
+    prev_drag_status="$drag_status"
+    if [ -f "$drag_status_cache" ]; then
+	rm "$drag_status_cache"
+    else
+	t_drag_status_set "$no_drag"  # reset it even if we dont move windows
+    fi
+    case "$prev_drag_status" in
+	$env_incompatible)
+	    exit 0
+	    ;;
+
+	$single_window)
+	    exit 0
+	    ;;
+    esac
+    if [ "$mouse_x" -lt "$prev_drag_status" ]; then
 	debug "will switch to the left"
 	tmux select-window -p
     else
