@@ -194,11 +194,16 @@ elif [ "$action_name" = "up" ]; then
 	t_drag_status_set "$no_drag"  # reset it even if we dont move windows
     fi
     case "$prev_drag_status" in
-	$env_incompatible)
+	
+	"$env_incompatible")
 	    exit 0
 	    ;;
 
-	$single_window)
+	"$single_window")
+	    exit 0
+	    ;;
+	
+	"$no_drag")
 	    exit 0
 	    ;;
     esac
