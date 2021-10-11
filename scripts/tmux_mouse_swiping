@@ -1,5 +1,5 @@
 #!/bin/sh
-__version="1.2.0 2021-10-11"
+__version="1.2.1 2021-10-11"
 #
 #   Copyright (c) 2021: Jacob.Lundqvist@gmail.com for date see __version above
 #   License: MIT
@@ -7,6 +7,8 @@ __version="1.2.0 2021-10-11"
 #   Part of https://github.com/jaclu/tmux_common
 #
 #   Version: $__version
+#       corrected single window display-message to use simpler params for vers < 3.2
+#     1.2.0 2021-10-11
 #       Reworked logic to better detect invalid conditions, and
 #       to deal with them.
 #     1.1.2 2021-10-11
@@ -153,7 +155,12 @@ env_check() {
     fi
     windows="$(tmux list-windows -F '#{window_id}' | wc -l)"
     if [ "$windows" -lt 2 ]; then
-	tmux display-message -N -d 1500 "Only 1 window, can't switch"
+        msg="Only 1 window, can't switch"
+	if  expr "'$vers" \< "'3.2"   > /dev/null ; then
+    	    tmux display-message "$msg"
+	else
+	    tmux display-message -N -d 1500 "$msg"
+	fi
 	drag_status=$single_window # block window switch
     else
 	drag_status="$mouse_x"  #  Start drag detected
