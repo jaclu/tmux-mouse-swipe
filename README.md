@@ -2,6 +2,11 @@
 
 Right click and swipe left or right in any pane to switch window in that direction
 
+## Purpose
+
+When you are at the keyboard obviously a key sequence is both faster and more natural to switch windows. 
+I use this tool mostly to just getting a quick overview when having the terminal on a side screen, in such cases mouse swiping is handy.
+
 ## Installation
 
 Compatability: tmux version 3.0 or higher
