@@ -1,5 +1,5 @@
 #!/bin/sh
-__version="1.3.0 2021-10-12"
+__version="1.3.1 2021-10-13"
 #
 #   Copyright (c) 2021: Jacob.Lundqvist@gmail.com for date see __version above
 #   License: MIT
@@ -7,6 +7,8 @@ __version="1.3.0 2021-10-12"
 #   Part of https://github.com/jaclu/tmux_common
 #
 #   Version: $__version
+#       Added handling of mouse_y to capture vertical swipes to switch session
+#     1.3.0 2021-10-12
 #       lot of cleanup and improved handle_up to make sure there was sideways motion
 #     1.2.1 2021-10-11
 #       corrected single window display-message to use simpler params for vers < 3.2
@@ -38,6 +40,7 @@ app_name="tmux_mouse_swiping"
 
 action_name="$1"
 mouse_x="$2"
+mouse_y="$3"
 
 # VERSION_LIMIT
 # ok 3.0
@@ -49,7 +52,6 @@ min_version="3.0"
 env_untested="untested"
 env_incompatible="incompat"
 no_drag=0
-single_window=-1
 
 drag_status_cache="/tmp/drag_status_cache"
 log_file="/tmp/tmux_mouse_swiping.log"
@@ -114,7 +116,7 @@ env_check() {
 	    return
 	fi
 	if  expr "'$vers" \< "'3.0"   > /dev/null ; then
-	    incompatible_env "vers < 3.0 no mouse_x support, so this utility can not work properly"
+	    incompatible_env "vers < 3.0 no mouse_x / mouse_y support, so this utility can not work properly"
 	fi
 	if  expr "'$vers" \< "'$min_version"   > /dev/null ; then
 	    incompatible_env "tmux $vers < min vers: $min_version"
@@ -122,18 +124,7 @@ env_check() {
 	fi
 	drag_status=$no_drag
     fi
-    windows="$(tmux list-windows -F '#{window_id}' | wc -l)"
-    if [ "$windows" -lt 2 ]; then
-        msg="Only 1 window, can't switch"
-	if  expr "'$vers" \< "'3.2"   > /dev/null ; then
-    	    tmux display-message "$msg"
-	else
-	    tmux display-message -N -d 1500 "$msg"
-	fi
-	drag_status=$single_window # block window switch
-    else
-	drag_status="$mouse_x"  #  Start drag detected
-    fi
+    drag_status="$mouse_x $mouse_y"  #  Start drag detected
     t_drag_status_set "$drag_status"
 }
 
@@ -147,20 +138,57 @@ handle_up() {
     fi
 
     case "$prev_drag_status" in
-	"$env_incompatible" | "$single_window" | "$no_drag" )
+	"$env_incompatible" | "$no_drag" )
 	    return
     esac
+
+    org_mouse_x="${prev_drag_status%% *}"
+    org_mouse_y="${prev_drag_status#* }"
     
-    if [ "$mouse_x" -lt "$prev_drag_status" ]; then
-	debug "will switch to the left"
-	tmux select-window -p
-    elif [ "$mouse_x" -gt "$prev_drag_status" ]; then
-	# second check ensures no window switch if right button is clicked
-	# and no sideways motion is detected
-	debug "will switch to the right"
-	tmux select-window -n
+    diff_x=$(( mouse_x - org_mouse_x ))
+    diff_y=$(( mouse_y - org_mouse_y ))
+    # get abs of diffs
+    diff_x=${diff_x#-}
+    diff_y=${diff_y#-}
+    
+    #echo "mouse  x[$mouse_x] y[$mouse_y]  diff x[$diff_x] y[$diff_y]"
+
+    if [ "$diff_x" -gt "$diff_y" ]; then
+	if [ "$(tmux list-windows -F '#{window_id}' | wc -l)" -lt 2 ]; then
+	    tmux display-message "tmux-mouse-swipe: Only one window, can't switch!"
+	    exit 0
+	fi
+	if [ "$mouse_x" -gt "$org_mouse_x" ]; then
+	    # second check ensures no window switch if right button is clicked
+	    # and no sideways motion is detected
+	    debug "will switch to the right"
+	    tmux select-window -n
+    	elif [ "$mouse_x" -lt "$org_mouse_x" ]; then
+	    debug "will switch to the left"
+	    tmux select-window -p
+	else
+	    # should not happe, we keep it here just in case
+	    tmux display-message "tmux-mouse-swipe: Did not detect any horizontal movement!"
+	fi
+    elif [ "$diff_x" -lt "$diff_y" ]; then
+	if [ "$(tmux list-sessions | wc -l)" -lt "2" ]; then
+	    tmux display-message "tmux-mouse-swipe: Only one session, can't switch!"
+	    exit 0
+	fi
+	if [ "$mouse_y" -gt "$org_mouse_y" ]; then
+	    # second check ensures no window switch if right button is clicked
+	    # and no sideways motion is detected
+	    debug "will switch to next session"
+	    tmux switch-client -n
+    	elif [ "$mouse_y" -lt "$org_mouse_y" ]; then
+	    debug "will switch to previous session"
+	    tmux switch-client -p
+	else
+	    # should not happe, we keep it here just in case
+	    tmux display-message "tmux-mouse-swipe: Did not detect any horizontal movement!"
+	fi
     else
-	tmux display-message "tmux-mouse-swipe did not detect any horizontal movement!"
+	tmux display-message "tmux-mouse-swipe: Did not detect any movement!"
     fi
 }
 
