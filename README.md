@@ -49,7 +49,7 @@ tmux source-file ~/.tmux.conf
 
 Once installed, try pressing down right button and swipe up, down, left or right on any pane.
 
-Once you release the button, tmux should switch window after horizonal swipe and session after vertial.
+Once you release the button, tmux should switch window after horizonal swipe and session after vertical.
 
 ### Pane borders
 tmux sends mouse coordinates relative to the pane that the mouse is over, so if you cross a pane border during the swipe, the direction of movement will most likely not be the intended.
