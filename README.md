@@ -51,7 +51,7 @@ Once installed, try pressing down right button and swipe up, down, left or right
 
 Once you release the button, tmux should switch window after horizonal swipe and session after vertical.
 
-If you only have one Window or Session, a message will be displayed that the requested operation can not be performed, depending on swipe direction.
+If you only have one Window or Session, a message will be displayed that the requested action can not be performed, depending on swipe direction.
 
 ### Pane borders
 tmux sends mouse coordinates relative to the pane that the mouse is over, so if you cross a pane border during the swipe, the direction of movement will most likely not be the intended.
