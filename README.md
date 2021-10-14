@@ -54,14 +54,20 @@ Once you release the button, tmux should switch window after horizonal swipe and
 If you only have one Window or Session, a message will be displayed that the requested action can not be performed, depending on swipe direction.
 
 ### Pane borders
-tmux sends mouse coordinates relative to the pane that the mouse is over, so if you cross a pane border during the swipe, the direction of movement will most likely not be the intended.
+
+tmux sends mouse coordinates relative to the pane that the mouse is over, so if you cross a pane border during the swipe, 
+the direction of movement will most likely not be the intended.
+
+### Basic modifications
+
+The probably most likely thing to change would be to bind the actual script registering mouse events to other mouse triggering events. 
+For that check mouse_swipe.tmux in the top directory of this repo.
 
 ### Performance
 
 Please note the plugin will be called each time the mouse moves another char, 
 so on really slow systems, there might be some lag between letting go of the button 
 and the windows switch to occur.
-
 If you notice such lag, try a shorter move, you only need to swipe one character.
 
 Let me know if that doesn't help, and I will see if I can optimize things further.
