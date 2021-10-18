@@ -65,6 +65,8 @@ For that check mouse_swipe.tmux in the top directory of this repo.
 
 ### Performance
 
+As of 2021-10-18 after using a benchmarking script I added to the repo and doing some tweaking, it can now handle arround 100 mouse events per second on my laptop.
+
 Please note the plugin will be called each time the mouse moves another char, 
 so on really slow systems, there might be some lag between letting go of the button 
 and the windows switch to occur.
