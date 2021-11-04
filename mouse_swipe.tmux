@@ -20,7 +20,7 @@ swipe_script="$CURRENT_DIR/scripts/tmux_mouse_swiping"
 # This normally triggers the right click default popups, they dont
 # play well when we use right clicks for other purposes.
 #
-unbind-key -n MouseDown3Pane
+tmux unbind-key -n MouseDown3Pane
 
 
 # telling swipe_script to do an env check on first call
