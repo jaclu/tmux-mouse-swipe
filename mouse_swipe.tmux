@@ -24,7 +24,7 @@ tmux unbind-key -n MouseDown3Pane
 
 
 # telling swipe_script to do an env check on first call
-tmux set-option -s @mouse_drag_status  "untested"
+tmux set-option -g @mouse_drag_status  "untested"
 
 #
 #   Fot all the info you need about Mouse events and locations, see
