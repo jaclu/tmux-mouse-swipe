@@ -1,6 +1,6 @@
 # Sincere apologies!
 
-On Nov 6, 2021 I commited a lot of new stuff, but did'nt realise I was not actually using it before or after commiting, so this was not in a useable state for a full week. I have fixed all this now, and will make sure to thoruougly test before committing in the future...
+On Nov 6, 2021 I commited a lot of new stuff, but did'nt realise I was not actually using it before or after commiting, so this was not in a useable state for a full week. I have fixed all this now, and will make sure to thoroughly test before committing in the future...
 
 
 # tmux-mouse-swipe
