@@ -1,5 +1,5 @@
 #!/bin/sh
-__version="1.4.2 2021-11-14"
+__version="1.4.3 2021-11-14"
 #
 #   Copyright (c) 2021: Jacob.Lundqvist@gmail.com for date see __version above
 #   License: MIT
@@ -7,6 +7,9 @@ __version="1.4.2 2021-11-14"
 #   Part of https://github.com/jaclu/tmux-mouse-swipe
 #
 #   Version: $__version
+#       Ensuring that debug statements without debug level are always echoed and
+#       if possible written to log file, to ensure tmux also receives it.
+#     1.4.2 2021-11-14
 #       Added param paramcheck, to verify user set variables
 #       Implemented debug levels
 #     1.4.1 2021-11-13
@@ -103,11 +106,8 @@ debug() {
     case "$log_lvl" in
         (*[!0123456789]*)
             msg="ERROR log_lvl [$log_lvl] not an integer value!"
-            if [ -n "$log_file" ]; then
-                debug 0 "$msg"
-            else
-                echo "$msg"
-            fi
+            echo "$msg"
+            [ -n "$log_file" ] && debug 0 "$msg"
             exit 1
             ;;
     esac
