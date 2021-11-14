@@ -5,7 +5,11 @@
 #
 #   Part of https://github.com/jaclu/tmux-mouse-swipe
 #
-#   Version: 1.1 2021-11-04
+#   Version: 1.1.1 2021-11-14
+#       Renamed action script to handle_mouse_swipe.sh
+#       Sets initial mouse_drag_status as a server option to be
+#       consistent between all sessions
+#     1.1 2021-11-04
 #       Added unbinding of the right click default popup
 #     1.0  2021-10-07
 #       Initial release
@@ -13,7 +17,7 @@
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-swipe_script="$CURRENT_DIR/scripts/tmux_mouse_swiping"
+swipe_script="$CURRENT_DIR/scripts/handle_mouse_swipe.sh"
 
 
 #
@@ -24,7 +28,7 @@ tmux unbind-key -n MouseDown3Pane
 
 
 # telling swipe_script to do an env check on first call
-tmux set-option -g @mouse_drag_status  "untested"
+tmux set-option -s @mouse_drag_status 'untested'
 
 #
 #   Fot all the info you need about Mouse events and locations, see
