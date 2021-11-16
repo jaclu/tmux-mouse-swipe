@@ -1,5 +1,5 @@
 #!/bin/sh
-__version="1.4.3 2021-11-14"
+__version="1.4.4 2021-11-16"
 #
 #   Copyright (c) 2021: Jacob.Lundqvist@gmail.com for date see __version above
 #   License: MIT
@@ -7,6 +7,8 @@ __version="1.4.3 2021-11-14"
 #   Part of https://github.com/jaclu/tmux-mouse-swipe
 #
 #   Version: $__version
+#       switched to -g flag for @mouse_drag_status
+#     1.4.3 2021-11-14
 #       Ensuring that debug statements without debug level are always echoed and
 #       if possible written to log file, to ensure tmux also receives it.
 #     1.4.2 2021-11-14
@@ -192,7 +194,7 @@ drag_status_set() {
     drag_status="$status"
     if [ "$push_it" = "1" ]; then
         debug 5 "  pushing status to tmux: $status"
-        tmux set-option -s @mouse_drag_status "$status"
+        tmux set-option -g @mouse_drag_status "$status"
     fi
 }
 
@@ -204,7 +206,7 @@ drag_status_get() {
         debug 5 "  < reading $drag_stat_cache_file, found: $drag_status"
     else
         drag_status="untested"
-        ds_prel="$(tmux show -s @mouse_drag_status)"
+        ds_prel="$(tmux show -g @mouse_drag_status)"
         drag_status="$(echo "$ds_prel" | cut -d' ' -f 2)"
         debug 5 "  < drag_status_get: prel[$ds_prel] status[$drag_status]"
     fi
