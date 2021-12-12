@@ -47,5 +47,5 @@ tmux set-option -g @mouse_drag_status 'untested'
 #   Fot all the info you need about Mouse events and locations, see
 #   man tmux - MOUSE SUPPORT section. to find what best matches your needs.
 #
-tmux  bind-key -N "(tmux-mouse-swipe) Swipe started"   -n MouseDrag3Pane    run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
-tmux bind-key  -N "(tmux-mouse-swipe) Swipe completed" -n MouseDragEnd3Pane run "$swipe_script up   '#{mouse_x}' '#{mouse_y}'"
+tmux bind-key -n MouseDrag3Pane    run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
+tmux bind-key -n MouseDragEnd3Pane run "$swipe_script up   '#{mouse_x}' '#{mouse_y}'"
