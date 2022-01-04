@@ -44,7 +44,7 @@ tmux unbind-key -n MouseDown3Pane
 tmux set-option -g @mouse_drag_status 'untested'
 
 #
-#   Fot all the info you need about Mouse events and locations, see
+#   For all the info you need about Mouse events and locations, see
 #   man tmux - MOUSE SUPPORT section. to find what best matches your needs.
 #
 tmux bind-key -n MouseDrag3Pane    run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
