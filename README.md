@@ -9,7 +9,7 @@ As allways any suggestions for improvements are welcome!
 
 When you are at the keyboard obviously a key sequence is both faster and more
 natural to switch sessions or windows.
-I use this tool mostly to just getting a quick overview when having the
+I use this tool mostly just getting a quick overview when having the
 terminal on a side screen, in such cases mouse swiping is handy.
 
 The reason I wrote it as a posix script is that since it gets run multiple
