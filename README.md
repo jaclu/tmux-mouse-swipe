@@ -3,7 +3,7 @@
 Right click and swipe left or right in any pane to switch window in that
 direction or swipe up or down to switch session.
 
-As allways any suggestions for improvements are welcome!
+As always any suggestions for improvements are welcome!
 
 ## Purpose
 
@@ -13,12 +13,12 @@ I use this tool mostly just getting a quick overview when having the
 terminal on a side screen, in such cases mouse swiping is handy.
 
 The reason I wrote it as a posix script is that since it gets run multiple
-times in quick sequence,  on my iPad running iSH, there is a noticeable
+times in quick sequence, on my iPad running iSH, there is a noticeable
 performance boost not having to repeatedly start bash scripts.
 
 ## Installation
 
-Compatability: tmux version 3.0 or higher
+Comparability: tmux version 3.0 or higher
 
 ### With [Tmux Plugin Manager](https://github.com/tmux-plugins/tpm) (recommended)
 
@@ -32,7 +32,7 @@ Hit `<prefix> + I` to fetch the plugin and source it.
 
 ### Manual Installation
 
-Clone the repo:
+Clone the repository:
 
 ```shell
 git clone https://github.com/jaclu/tmux-mouse-swipe.git ~/clone/path
@@ -55,7 +55,7 @@ tmux source-file ~/.tmux.conf
 Once installed, try pressing down right button and swipe up, down, left
 or right on any pane.
 
-Once you release the button, tmux should switch window after horizonal
+Once you release the button, tmux should switch window after horizontal
 swipe and session after vertical.
 
 If you only have one Window or Session, a message will be displayed
@@ -77,7 +77,7 @@ the direction of movement will most likely not be the intended.
 
 If you want to bind this to another mouse event, search for the
 MOUSE SUPPORT section in the tmux man page for details on how to bind mouse
-events. Change mouse_swipe.tmux in the top directory of this repo.
+events. Change mouse_swipe.tmux in the top directory of this repository.
 
 ## Contributing
 

@@ -1,32 +1,42 @@
 #!/usr/bin/env bash
 #
-#   Copyright (c) 2021: Jacob.Lundqvist@gmail.com
+#   Copyright (c) 2021,2022: Jacob.Lundqvist@gmail.com
 #   License: MIT
 #
 #   Part of https://github.com/jaclu/tmux-mouse-swipe
 #
-#   Version: 1.1.2 2021-11-16
-#       switched to -g flag for @mouse_drag_status
-#     1.1.1 2021-11-14
-#       Renamed action script to handle_mouse_swipe.sh
-#       Sets initial mouse_drag_status as a server option to be
-#       consistent between all sessions
-#     1.1 2021-11-04
-#       Added unbinding of the right click default popup
-#     1.0  2021-10-07
-#       Initial release
+#   Version: 1.2.0 2022-03-19
 #
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-swipe_script="$CURRENT_DIR/scripts/handle_mouse_swipe.sh"
+SCRIPTS_DIR="$CURRENT_DIR/scripts"
+
+. "$SCRIPTS_DIR/utils.sh"
+
+swipe_script="$SCRIPTS_DIR/handle_mouse_swipe.sh"
 
 
 #
-#  This normally triggers the right click default popups, they dont
+#  Generic plugin setting I use to add Notes to keys that are bound
+#  This makes this key binding show up when doing <prefix> ?
+#  If not set to "Yes", no attempt at adding notes will happen
+#  bind-key Notes were added in tmux 3.1, so should not be used on older versions!
+#
+if bool_param "$(get_tmux_option "@plugin_use_notes" "No")"; then
+    use_notes=1
+else
+    use_notes=0
+fi
+log_it "use_notes=[$use_notes]"
+
+
+#
+#  This normally triggers the right click default popups, they don't
 #  play well when we use right clicks for other purposes.
 #
 tmux unbind-key -n MouseDown3Pane
+
 
 #
 #  Telling handle_mose_swipe.sh to do an env check on first call.
@@ -43,9 +53,15 @@ tmux unbind-key -n MouseDown3Pane
 #
 tmux set-option -g @mouse_drag_status 'untested'
 
+
 #
 #   For all the info you need about Mouse events and locations, see
 #   man tmux - MOUSE SUPPORT section. to find what best matches your needs.
 #
-tmux bind-key -n MouseDrag3Pane    run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
-tmux bind-key -n MouseDragEnd3Pane run "$swipe_script up   '#{mouse_x}' '#{mouse_y}'"
+if [ "$use_notes" -eq 1 ]; then
+    tmux bind-key -N "tmux-mouse-swipe drag start" -n MouseDrag3Pane    run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
+    tmux bind-key -N "tmux-mouse-swipe drag stop" -n MouseDragEnd3Pane run "$swipe_script up   '#{mouse_x}' '#{mouse_y}'"
+else
+    tmux bind-key -n MouseDrag3Pane    run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
+    tmux bind-key -n MouseDragEnd3Pane run "$swipe_script up   '#{mouse_x}' '#{mouse_y}'"
+fi

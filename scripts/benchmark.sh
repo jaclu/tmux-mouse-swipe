@@ -14,7 +14,7 @@
 #
 #  Benchmark script to test how responsive tmux_mouse_swiping is.
 #  This does not use tmux events, so if you have changed the bound event,
-#  it doesnt matter.
+#  it doesn't matter.
 #
 #  At least one tmux session must be running on the same machine as
 #  this benchmark will be run, since  @mouse_drag_status will be read and set.
@@ -41,7 +41,7 @@
 #                  improve things. you can always leave it disabled.
 #
 #  debug()         If you want to see what is happening consider enabling
-#                  this, on my machine this halves the perfomance of
+#                  this, on my machine this halves the performance of
 #                  the benchmark...
 #
 
@@ -77,8 +77,8 @@ while :; do
     #
     # Calculating duration and comparing it inside the loop gives something
     # like a 25% overhead, but since it is constant on a given system,
-    # it doesnt really matter. The interesting part is not
-    # the absoulute number, it is how it changes depending on code tweaks.
+    # it doesn't really matter. The interesting part is not
+    # the absolute number, it is how it changes depending on code tweaks.
     #
     [ "$(date +%s)" -ge "$t_end" ] && break
 done
