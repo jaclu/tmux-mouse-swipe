@@ -93,7 +93,7 @@ param_checks() {
     #
     case "$benchmarking" in
         (*[!01]*)
-            echo "ERROR benchmarking [$benchmarking] must be 0 or 1!"
+            echo "ERROR bench marking [$benchmarking] must be 0 or 1!"
             exit 1
             ;;
     esac
