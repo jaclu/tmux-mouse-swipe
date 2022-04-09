@@ -67,6 +67,10 @@ Since drag isn't registered until you move one character cell, and at least
 one more cell of movement is needed to detect direction, minimal movement
 distance is two characters.
 
+## Not purely vertical / horizontal swipes
+
+If both vertical and horizontal swiping is detected, the axis with the most delta is assumed to be the intended action.
+
 ## Pane borders
 
 tmux sends mouse coordinates relative to the pane that the mouse is over,
