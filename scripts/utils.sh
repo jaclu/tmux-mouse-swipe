@@ -7,7 +7,7 @@
 #
 #   Part of https://github.com/jaclu/tmux-menus
 #
-#   Version: 1.3.1 2022-04-13
+#   Version: 1.3.2 2022-04-13
 #
 #  Common stuff
 #
@@ -17,7 +17,7 @@
 #  Shorthand, to avoid manually typing package name on multiple
 #  locations, easily getting out of sync.
 #
-# plugin_name="tmux-mouse-swipe"
+plugin_name="tmux-mouse-swipe"
 
 
 #
