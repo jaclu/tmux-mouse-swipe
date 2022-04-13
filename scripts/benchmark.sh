@@ -1,15 +1,11 @@
 #!/usr/bin/env bash
 #
-#   Copyright (c) 2021: Jacob.Lundqvist@gmail.com
+#   Copyright (c) 2021,2022: Jacob.Lundqvist@gmail.com
 #   License: MIT
 #
 #   Part of https://github.com/jaclu/tmux-mouse-swipe
 #
-#   Version: 1.1.0 2021-11-13
-#       Added absolute dirs, so this will run even if called when not
-#       in this directory.
-#     1.0.0 2021-10-18
-#       Initial deploy
+#   Version: 1.1.1 2022-04-13
 #
 #
 #  Benchmark script to test how responsive tmux_mouse_swiping is.
@@ -56,14 +52,14 @@ run_time=10
 
 
 # reset env, especially force a env_check at first run
-$(dirname "$CURRENT_DIR")/mouse_swipe.tmux
+"$(dirname "$CURRENT_DIR")"/mouse_swipe.tmux
 
 
 #
 # First do one run, so env should have been picked up before the loop
 #
-$CURRENT_DIR/tmux_mouse_swiping down 2 2
-$CURRENT_DIR/tmux_mouse_swiping up 4 2
+"$CURRENT_DIR"/tmux_mouse_swiping down 2 2
+"$CURRENT_DIR"/tmux_mouse_swiping up 4 2
 
 
 echo "--- Will do mouse swiping for ${run_time}s ---"
@@ -73,7 +69,7 @@ t_end="$(( t_start + run_time ))"
 x=0
 while :; do
     x=$((x+1))
-    $CURRENT_DIR/tmux_mouse_swiping down $x 5
+    "$CURRENT_DIR"/tmux_mouse_swiping down $x 5
     #
     # Calculating duration and comparing it inside the loop gives something
     # like a 25% overhead, but since it is constant on a given system,
@@ -84,9 +80,9 @@ while :; do
 done
 echo "---  ending swipe  ---"
 
-$CURRENT_DIR/tmux_mouse_swiping up "5" "5"
+"$CURRENT_DIR"/tmux_mouse_swiping up "5" "5"
 
+# shellcheck disable=SC2154
 echo "Made $x swipe steps in ${duration} seconds"
 
-
-$(dirname "$CURRENT_DIR")/mouse_swipe.tmux  # reset env again
+"$(dirname "$CURRENT_DIR")"/mouse_swipe.tmux  # reset env again

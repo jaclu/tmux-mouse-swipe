@@ -1,5 +1,5 @@
 #!/bin/sh
-__version="1.5.0 2022-03-19"
+__version="1.5.1 2022-04-13"
 #
 #   Copyright (c) 2021,2022: Jacob.Lundqvist@gmail.com
 #   License: MIT
@@ -9,23 +9,13 @@ __version="1.5.0 2022-03-19"
 #   This enables changing tmux windows or sessions by triggering the events
 #   defined in mouse_swipe.tmux
 #
+
 # shellcheck disable=SC1007
 CURRENT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 
+# shellcheck disable=SC1091
 . "$CURRENT_DIR/utils.sh"
 
-
-#
-#  0  Always logged if logging enabled, also direct via tmux display
-#  1  Announce action taken after a completed swipe
-#  2  display final movement
-#  3  entering more important functions
-#  4  reading writing state
-#  5  reading writing state functions
-#  6  adv checks turned out ok
-#  9  really detailed rarely to be used stuff
-#
-debug_lvl=9
 
 #
 #  If you do not want to use a cache file during swipe operations
@@ -46,8 +36,6 @@ benchmarking=0
 
 
 
-app_name="tmux-mouse-swipe"
-
 action_name="$1"
 mouse_x="$2"
 mouse_y="$3"
@@ -59,6 +47,28 @@ env_untested="untested"
 env_incompatible="incompatible"
 no_drag=0
 
+
+#
+#  Log if log_lvl <= debug_lvl
+#
+debug() {
+    log_lvl="$1"
+    msg="$2"
+
+    case "$log_lvl" in
+        (*[!0123456789]*)
+            log_it "ERROR log_lvl [$log_lvl] not an integer value!"
+            exit 1
+            ;;
+    esac
+
+    #
+    # level 0 is always displayed directly in tmux
+    #
+    #  shellcheck disable=SC2154
+    [ "$log_lvl" -le "$debug_lvl" ] && log_it "{$log_lvl} $msg"
+    [ "$log_lvl" -eq 0 ]  && tmux display "$msg"
+}
 
 
 verify_file_writeable() {
@@ -120,7 +130,7 @@ drag_status_set() {
 
     debug 3 "drag_status_set($status, $push_it)"
     if [ -n "$drag_stat_cache_file" ]; then
-        debug 4 "  writing [$status] to $drag_stat_cache_file"
+        debug 4 "writing [$status] to $drag_stat_cache_file"
         if ! echo "$status" > $drag_stat_cache_file; then
             echo "ERROR! cant write to drag_stat_cache_file [$drag_stat_cache_file]!"
             exit 1
@@ -130,7 +140,7 @@ drag_status_set() {
     fi
     drag_status="$status"
     if [ "$push_it" = "1" ]; then
-        debug 4 "  pushing status to tmux: $status"
+        debug 4 "pushing status to tmux: $status"
         tmux set-option -g @mouse_drag_status "$status"
     fi
 }
@@ -141,12 +151,12 @@ drag_status_get() {
     debug 5 "drag_status_get($mouse_x, $mouse_y)"
     if [ -n "$drag_stat_cache_file" ] && [ -f "$drag_stat_cache_file" ]; then
         drag_status="$(cat $drag_stat_cache_file)"
-        debug 4 "  < reading $drag_stat_cache_file, found: $drag_status"
+        debug 4 "< reading $drag_stat_cache_file, found: $drag_status"
     else
         drag_status="untested"
         ds_prel="$(tmux show -g @mouse_drag_status)"
         drag_status="$(echo "$ds_prel" | cut -d' ' -f 2)"
-        debug 4 "  < drag_status_get: prel[$ds_prel] status[$drag_status]"
+        debug 4 "< drag_status_get: prel[$ds_prel] status[$drag_status]"
     fi
 }
 
@@ -155,7 +165,8 @@ incompatible_env() {
     msg="$1"
     if [ "$drag_status" != $env_incompatible ]; then
         echo " "
-        echo "$app_name vers: $__version Detected an incompatible environment, and is now disabled"
+        #  shellcheck disable=SC2154
+        echo "$plugin_name vers: $__version Detected an incompatible environment, and is now disabled"
         echo "Details should be bellow, press Escape when you have read this."
         echo "If you want to use this with limited functionality, change min_version in this script"
         echo "accordingly."
@@ -163,7 +174,7 @@ incompatible_env() {
         drag_status=$env_incompatible
         drag_status_set "$drag_status" 1
     fi
-    debug 0 "$app_name *** Incompatibility: $msg"
+    debug 0 "$plugin_name *** Incompatibility: $msg"
     echo "$msg"
 }
 
@@ -173,7 +184,7 @@ env_check() {
     vers="$(tmux -V | cut -d' ' -f 2)"
 
     if [ "$drag_status" = "$env_incompatible" ]; then
-        debug 0 "$app_name ERROR: env incompatible"
+        debug 0 "$plugin_name ERROR: env incompatible"
         clear_status
         exit 0
     elif [ "$drag_status" = "$env_untested" ] || [ -z "$drag_status" ]; then
@@ -192,7 +203,7 @@ env_check() {
             clear_status
             exit 0
         fi
-        debug 6 "  no issues found"
+        debug 6 "no env issues found"
         drag_status=$no_drag
         drag_status_set $drag_status 1
     fi
@@ -221,32 +232,32 @@ handle_up() {
     debug 2 "diff abs: [$abs_x][$abs_y] rel: [$diff_x][$diff_y]"
 
     if [ $(( abs_x + abs_y )) -eq 0 ]; then  # no movement
-        debug 0 "$app_name: Did not detect any movement!"
+        debug 0 "$plugin_name: Did not detect any movement!"
 
     elif [ "$abs_x" -gt "$abs_y" ] ; then    # Horizontal swipe
         if [ "$(tmux list-windows -F '#{window_id}' | wc -l)" -lt 2 ]; then
-            debug 0 "$app_name: Only one window, can't switch!"
+            debug 0 "$plugin_name: Only one window, can't switch!"
             return
         elif [ "$mouse_x" -gt "$org_mouse_x" ]; then
-            debug 1 "  will switch to the right"
+            debug 1 "will switch to the right"
             [ "$benchmarking" -eq 0 ] && tmux select-window -n
         else
-            debug 1 "  will switch to the left"
+            debug 1 "will switch to the left"
             [ "$benchmarking" -eq 0 ] && tmux select-window -p
         fi
 
     elif [ "$abs_x" -eq "$abs_y" ] ; then    # Unclear direction
-        debug 0 "$app_name: equal horizontal and vertical movement, direction unclear!"
+        debug 0 "$plugin_name: equal horizontal and vertical movement, direction unclear!"
 
     else                                     # Vertical swipe
         if [ "$(tmux list-sessions | wc -l)" -lt "2" ]; then
-            debug 0 "$app_name: Only one session, can't switch!"
+            debug 0 "$plugin_name: Only one session, can't switch!"
             return
         elif [ "$mouse_y" -gt "$org_mouse_y" ]; then
-            debug 1 "  will switch to next session"
+            debug 1 "will switch to next session"
             [ "$benchmarking" -eq 0 ] && tmux switch-client -n
         else
-            debug 1 "  will switch to previous session"
+            debug 1 "will switch to previous session"
             [ "$benchmarking" -eq 0 ] && tmux switch-client -p
         fi
     fi
@@ -271,14 +282,14 @@ clear_status() {
 remove_cache() {
     debug 5 "remove_cache()"
     if [ -n "$drag_stat_cache_file" ] && [ -f "$drag_stat_cache_file" ]; then
-        debug 4 "  Found cache file [$drag_stat_cache_file], removing it"
+        debug 4 "Found cache file [$drag_stat_cache_file], removing it"
         rm "$drag_stat_cache_file"
     fi
 }
 
 
 main() {
-    debug 9 "$app_name called - parameters: [$action_name] [$mouse_x] [$mouse_y]"
+    debug 9 "$plugin_name called - parameters: [$action_name] [$mouse_x] [$mouse_y]"
 
     drag_status_get
 
@@ -291,7 +302,7 @@ main() {
             ;;
 
         "$env_incompatible")
-            debug 0 "$app_name ERROR: incompatible env!"
+            debug 0 "$plugin_name ERROR: incompatible env!"
             clear_status
             exit 0
     esac
@@ -329,5 +340,6 @@ case "$action_name" in
         ;;
 esac
 
+exit 0
 
 

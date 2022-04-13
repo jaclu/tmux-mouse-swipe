@@ -1,20 +1,71 @@
 #!/usr/bin/env bash
+#  shellcheck disable=SC2154
+#  Directives for shellcheck directly after bang path are global
 #
 #   Copyright (c) 2021,2022: Jacob.Lundqvist@gmail.com
 #   License: MIT
 #
 #   Part of https://github.com/jaclu/tmux-mouse-swipe
 #
-#   Version: 1.2.0 2022-03-19
+#   Version: 1.2.1 2022-04-13
 #
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 SCRIPTS_DIR="$CURRENT_DIR/scripts"
 
+# shellcheck disable=SC1091
 . "$SCRIPTS_DIR/utils.sh"
 
 swipe_script="$SCRIPTS_DIR/handle_mouse_swipe.sh"
+
+
+get_tmux_option() {
+    gtm_option=$1
+    gtm_default=$2
+    gtm_value=$(tmux show-option -gqv "$gtm_option")
+    if [ -z "$gtm_value" ]; then
+        echo "$gtm_default"
+    else
+        echo "$gtm_value"
+    fi
+    unset gtm_option
+    unset gtm_default
+    unset gtm_value
+}
+
+
+#
+#  Aargh in shell boolean true is 0, but to make the boolean parameters
+#  more relatable for users 1 is yes and 0 is no, so we need to switch
+#  them here in order for assignment to follow boolean logic in caller
+#
+bool_param() {
+    case "$1" in
+
+        "0") return 1 ;;
+
+        "1") return 0 ;;
+
+        "yes" | "Yes" | "YES" | "true" | "True" | "TRUE" )
+            #  Be a nice guy and accept some common positives
+            log_it "Converted incorrect positive [$1] to 1"
+            return 0
+            ;;
+
+        "no" | "No" | "NO" | "false" | "False" | "FALSE" )
+            #  Be a nice guy and accept some common negatives
+            log_it "Converted incorrect negative [$1] to 0"
+            return 1
+            ;;
+
+        *)
+            log_it "Invalid parameter bool_param($1)"
+            tmux display "ERROR: bool_param($1) - should be 0 or 1"
+
+    esac
+    return 1
+}
 
 
 #
@@ -59,8 +110,8 @@ tmux set-option -g @mouse_drag_status 'untested'
 #   man tmux - MOUSE SUPPORT section. to find what best matches your needs.
 #
 if [ "$use_notes" -eq 1 ]; then
-    tmux bind-key -N "tmux-mouse-swipe drag start" -n MouseDrag3Pane    run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
-    tmux bind-key -N "tmux-mouse-swipe drag stop" -n MouseDragEnd3Pane run "$swipe_script up   '#{mouse_x}' '#{mouse_y}'"
+    tmux bind-key -N "$plugin_name drag start" -n MouseDrag3Pane    run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
+    tmux bind-key -N "$plugin_name drag stop" -n MouseDragEnd3Pane run "$swipe_script up   '#{mouse_x}' '#{mouse_y}'"
 else
     tmux bind-key -n MouseDrag3Pane    run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
     tmux bind-key -n MouseDragEnd3Pane run "$swipe_script up   '#{mouse_x}' '#{mouse_y}'"
