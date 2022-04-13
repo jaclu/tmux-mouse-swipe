@@ -7,7 +7,7 @@
 #
 #   Part of https://github.com/jaclu/tmux-menus
 #
-#   Version: 1.3.2 2022-04-13
+#   Version: 1.3.3 2022-04-13
 #
 #  Common stuff
 #
@@ -24,7 +24,7 @@ plugin_name="tmux-mouse-swipe"
 #  If log_file is empty or undefined, no logging will occur,
 #  so comment it out for normal usage.
 #
-log_file="/tmp/$plugin_name.log"
+# log_file="/tmp/$plugin_name.log"
 
 
 #
