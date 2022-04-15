@@ -7,7 +7,7 @@
 #
 #   Part of https://github.com/jaclu/tmux-mouse-swipe
 #
-#   Version: 1.3.0 2022-04-15
+#   Version: 1.3.1 2022-04-15
 #
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -49,24 +49,24 @@ bool_param() {
 
         "yes" | "Yes" | "YES" | "true" | "True" | "TRUE" )
             #  Be a nice guy and accept some common positives
-            log_it "Converted incorrect positive [$1] to 1"
+            log_it "Converted incorrect positive [$1] to 0"
             return 0
             ;;
 
         "no" | "No" | "NO" | "false" | "False" | "FALSE" )
             #  Be a nice guy and accept some common negatives
-            log_it "Converted incorrect negative [$1] to 0"
+            log_it "Converted incorrect negative [$1] to 1"
             return 1
             ;;
 
         *)
             log_it "Invalid parameter bool_param($1)"
-            tmux display "ERROR: bool_param($1) - should be 0 or 1"
+            error_msg "bool_param($1) - should be 0 or 1"
+            ;;
 
     esac
-    return 1
+    return 1 # default to False
 }
-
 
 #
 #  Generic plugin setting I use to add Notes to keys that are bound
