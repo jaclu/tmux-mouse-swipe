@@ -7,7 +7,7 @@
 #
 #   Part of https://github.com/jaclu/tmux-mouse-swipe
 #
-#   Version: 1.2.2 2022-04-14
+#   Version: 1.3.0 2022-04-15
 #
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -74,7 +74,7 @@ bool_param() {
 #  If not set to "Yes", no attempt at adding notes will happen
 #  bind-key Notes were added in tmux 3.1, so should not be used on older versions!
 #
-if bool_param "$(get_tmux_option "@plugin_use_notes" "No")"; then
+if bool_param "$(get_tmux_option "@use_bind_key_notes_in_plugins" "No")"; then
     use_notes=1
 else
     use_notes=0
