@@ -7,7 +7,7 @@
 #
 #   Part of https://github.com/jaclu/tmux-mouse-swipe
 #
-#   Version: 1.3.1 2022-04-15
+#   Version: 1.3.2 2022-09-15
 #
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -23,7 +23,7 @@ swipe_script="$SCRIPTS_DIR/handle_mouse_swipe.sh"
 get_tmux_option() {
     gtm_option=$1
     gtm_default=$2
-    gtm_value=$(tmux show-option -gqv "$gtm_option")
+    gtm_value=$($TMUX_BIN show-option -gqv "$gtm_option")
     if [ -z "$gtm_value" ]; then
         echo "$gtm_default"
     else
@@ -86,7 +86,7 @@ log_it "use_notes=[$use_notes]"
 #  This normally triggers the right click default popups, they don't
 #  play well when we use right clicks for other purposes.
 #
-tmux unbind-key -n MouseDown3Pane
+$TMUX_BIN unbind-key -n MouseDown3Pane
 
 
 #
@@ -102,7 +102,7 @@ tmux unbind-key -n MouseDown3Pane
 #  Either way now it is switched to a -g both here and in the handler script,
 #  and this issue is gone!
 #
-tmux set-option -g @mouse_drag_status 'untested'
+$TMUX_BIN set-option -g @mouse_drag_status 'untested'
 
 
 #
@@ -110,9 +110,9 @@ tmux set-option -g @mouse_drag_status 'untested'
 #   man tmux - MOUSE SUPPORT section. to find what best matches your needs.
 #
 if [ "$use_notes" -eq 1 ]; then
-    tmux bind-key -N "$plugin_name drag start" -n MouseDrag3Pane    run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
-    tmux bind-key -N "$plugin_name drag stop" -n MouseDragEnd3Pane run "$swipe_script up   '#{mouse_x}' '#{mouse_y}'"
+    $TMUX_BIN bind-key -N "$plugin_name drag start" -n MouseDrag3Pane    run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
+    $TMUX_BIN bind-key -N "$plugin_name drag stop" -n MouseDragEnd3Pane run "$swipe_script up   '#{mouse_x}' '#{mouse_y}'"
 else
-    tmux bind-key -n MouseDrag3Pane    run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
-    tmux bind-key -n MouseDragEnd3Pane run "$swipe_script up   '#{mouse_x}' '#{mouse_y}'"
+    $TMUX_BIN bind-key -n MouseDrag3Pane    run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
+    $TMUX_BIN bind-key -n MouseDragEnd3Pane run "$swipe_script up   '#{mouse_x}' '#{mouse_y}'"
 fi
