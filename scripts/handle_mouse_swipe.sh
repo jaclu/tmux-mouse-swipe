@@ -1,5 +1,5 @@
 #!/bin/sh
-__version="1.5.1 2022-04-13"
+__version="1.5.2 2022-09-15"
 #
 #   Copyright (c) 2021,2022: Jacob.Lundqvist@gmail.com
 #   License: MIT
@@ -67,7 +67,7 @@ debug() {
     #
     #  shellcheck disable=SC2154
     [ "$log_lvl" -le "$debug_lvl" ] && log_it "{$log_lvl} $msg"
-    [ "$log_lvl" -eq 0 ]  && tmux display "$msg"
+    [ "$log_lvl" -eq 0 ]  && $TMUX_BIN display "$msg"
 }
 
 
@@ -141,7 +141,7 @@ drag_status_set() {
     drag_status="$status"
     if [ "$push_it" = "1" ]; then
         debug 4 "pushing status to tmux: $status"
-        tmux set-option -g @mouse_drag_status "$status"
+        $TMUX_BIN set-option -g @mouse_drag_status "$status"
     fi
 }
 
@@ -154,7 +154,7 @@ drag_status_get() {
         debug 4 "< reading $drag_stat_cache_file, found: $drag_status"
     else
         drag_status="untested"
-        ds_prel="$(tmux show -g @mouse_drag_status)"
+        ds_prel="$($TMUX_BIN show -g @mouse_drag_status)"
         drag_status="$(echo "$ds_prel" | cut -d' ' -f 2)"
         debug 4 "< drag_status_get: prel[$ds_prel] status[$drag_status]"
     fi
@@ -181,7 +181,7 @@ incompatible_env() {
 
 env_check() {
     debug 3 "env_check()"
-    vers="$(tmux -V | cut -d' ' -f 2)"
+    vers="$($TMUX_BIN -V | cut -d' ' -f 2)"
 
     if [ "$drag_status" = "$env_incompatible" ]; then
         debug 0 "$plugin_name ERROR: env incompatible"
@@ -199,7 +199,7 @@ env_check() {
             incompatible_env "vers < 3.0 no mouse_x / mouse_y support, so this utility can not work properly"
         fi
         if  expr "'$vers" \< "'$min_version"   > /dev/null ; then
-            incompatible_env "tmux $vers < min vers: $min_version"
+            incompatible_env "$TMUX_BIN $vers < min vers: $min_version"
             clear_status
             exit 0
         fi
@@ -235,30 +235,30 @@ handle_up() {
         debug 0 "$plugin_name: Did not detect any movement!"
 
     elif [ "$abs_x" -gt "$abs_y" ] ; then    # Horizontal swipe
-        if [ "$(tmux list-windows -F '#{window_id}' | wc -l)" -lt 2 ]; then
+        if [ "$($TMUX_BIN list-windows -F '#{window_id}' | wc -l)" -lt 2 ]; then
             debug 0 "$plugin_name: Only one window, can't switch!"
             return
         elif [ "$mouse_x" -gt "$org_mouse_x" ]; then
             debug 1 "will switch to the right"
-            [ "$benchmarking" -eq 0 ] && tmux select-window -n
+            [ "$benchmarking" -eq 0 ] && $TMUX_BIN select-window -n
         else
             debug 1 "will switch to the left"
-            [ "$benchmarking" -eq 0 ] && tmux select-window -p
+            [ "$benchmarking" -eq 0 ] && $TMUX_BIN select-window -p
         fi
 
     elif [ "$abs_x" -eq "$abs_y" ] ; then    # Unclear direction
         debug 0 "$plugin_name: equal horizontal and vertical movement, direction unclear!"
 
     else                                     # Vertical swipe
-        if [ "$(tmux list-sessions | wc -l)" -lt "2" ]; then
+        if [ "$($TMUX_BIN list-sessions | wc -l)" -lt "2" ]; then
             debug 0 "$plugin_name: Only one session, can't switch!"
             return
         elif [ "$mouse_y" -gt "$org_mouse_y" ]; then
             debug 1 "will switch to next session"
-            [ "$benchmarking" -eq 0 ] && tmux switch-client -n
+            [ "$benchmarking" -eq 0 ] && $TMUX_BIN switch-client -n
         else
             debug 1 "will switch to previous session"
-            [ "$benchmarking" -eq 0 ] && tmux switch-client -p
+            [ "$benchmarking" -eq 0 ] && $TMUX_BIN switch-client -p
         fi
     fi
 }
