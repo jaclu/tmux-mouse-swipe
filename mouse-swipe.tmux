@@ -7,7 +7,7 @@
 #
 #   Part of https://github.com/jaclu/tmux-mouse-swipe
 #
-#   Version: 1.3.2 2022-09-15
+#   Version: 1.3.3 2022-09-27
 #
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -75,11 +75,11 @@ bool_param() {
 #  bind-key Notes were added in tmux 3.1, so should not be used on older versions!
 #
 if bool_param "$(get_tmux_option "@use_bind_key_notes_in_plugins" "No")"; then
-    use_notes=1
+    note="-Nplugin:$plugin_name"
 else
-    use_notes=0
+    note=""
 fi
-log_it "use_notes=[$use_notes]"
+log_it "note=[$note]"
 
 
 #
@@ -109,10 +109,5 @@ $TMUX_BIN set-option -g @mouse_drag_status 'untested'
 #   For all the info you need about Mouse events and locations, see
 #   man tmux - MOUSE SUPPORT section. to find what best matches your needs.
 #
-if [ "$use_notes" -eq 1 ]; then
-    $TMUX_BIN bind-key -N "$plugin_name drag start" -n MouseDrag3Pane    run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
-    $TMUX_BIN bind-key -N "$plugin_name drag stop" -n MouseDragEnd3Pane run "$swipe_script up   '#{mouse_x}' '#{mouse_y}'"
-else
-    $TMUX_BIN bind-key -n MouseDrag3Pane    run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
-    $TMUX_BIN bind-key -n MouseDragEnd3Pane run "$swipe_script up   '#{mouse_x}' '#{mouse_y}'"
-fi
+$TMUX_BIN bind-key "$note" -n MouseDrag3Pane    run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
+$TMUX_BIN bind-key "$note" -n MouseDragEnd3Pane run "$swipe_script up   '#{mouse_x}' '#{mouse_y}'"
