@@ -49,13 +49,11 @@ bool_param() {
 
         "yes" | "Yes" | "YES" | "true" | "True" | "TRUE" )
             #  Be a nice guy and accept some common positives
-            log_it "Converted incorrect positive [$1] to 0"
             return 0
             ;;
 
         "no" | "No" | "NO" | "false" | "False" | "FALSE" )
             #  Be a nice guy and accept some common negatives
-            log_it "Converted incorrect negative [$1] to 1"
             return 1
             ;;
 
@@ -109,5 +107,7 @@ $TMUX_BIN set-option -g @mouse_drag_status 'untested'
 #   For all the info you need about Mouse events and locations, see
 #   man tmux - MOUSE SUPPORT section. to find what best matches your needs.
 #
-$TMUX_BIN bind-key "$note" -n MouseDrag3Pane    run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
-$TMUX_BIN bind-key "$note" -n MouseDragEnd3Pane run "$swipe_script up   '#{mouse_x}' '#{mouse_y}'"
+# shellcheck disable=SC2086
+$TMUX_BIN bind-key $note -n MouseDrag3Pane    run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
+# shellcheck disable=SC2086
+$TMUX_BIN bind-key $note -n MouseDragEnd3Pane run "$swipe_script up   '#{mouse_x}' '#{mouse_y}'"
