@@ -69,7 +69,9 @@ distance is two characters.
 
 ## Not purely vertical / horizontal swipes
 
-If both vertical and horizontal swiping is detected, the axis with the most delta is assumed to be the intended action.
+If both vertical and horizontal swiping is detected, the axis with the most 
+delta is assumed to be the intended direction. Risk for miss-interpertaion 
+is reduced by making a slightly longer swipe.
 
 ## Pane borders
 
@@ -81,7 +83,8 @@ the direction of movement will most likely not be the intended.
 
 If you want to bind this to another mouse event, search for the
 MOUSE SUPPORT section in the tmux man page for details on how to bind mouse
-events. Change mouse_swipe.tmux in the top directory of this repository.
+events. Change the binds towardsthe end of mouse_swipe.tmux in the top directory
+of this repository.
 
 ## Contributing
 
