@@ -83,7 +83,7 @@ the direction of movement will most likely not be the intended.
 
 If you want to bind this to another mouse event, search for the
 MOUSE SUPPORT section in the tmux man page for details on how to bind mouse
-events. Change the binds towardsthe end of mouse_swipe.tmux in the top directory
+events. Change the binds towards the end of mouse_swipe.tmux in the top directory
 of this repository.
 
 ## Contributing
