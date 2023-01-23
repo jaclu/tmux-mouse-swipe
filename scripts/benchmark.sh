@@ -41,19 +41,15 @@
 #                  the benchmark...
 #
 
-CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-
+CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 #
 # amount of seconds this should run
 #
 run_time=10
 
-
 # reset env, especially force a env_check at first run
 "$(dirname "$CURRENT_DIR")"/mouse_swipe.tmux
-
 
 #
 # First do one run, so env should have been picked up before the loop
@@ -61,14 +57,13 @@ run_time=10
 "$CURRENT_DIR"/tmux_mouse_swiping down 2 2
 "$CURRENT_DIR"/tmux_mouse_swiping up 4 2
 
-
 echo "--- Will do mouse swiping for ${run_time}s ---"
 t_start="$(date +%s)"
-t_end="$(( t_start + run_time ))"
+t_end="$((t_start + run_time))"
 
 x=0
 while :; do
-    x=$((x+1))
+    x=$((x + 1))
     "$CURRENT_DIR"/tmux_mouse_swiping down $x 5
     #
     # Calculating duration and comparing it inside the loop gives something
@@ -76,7 +71,7 @@ while :; do
     # it doesn't really matter. The interesting part is not
     # the absolute number, it is how it changes depending on code tweaks.
     #
-    [ "$(date +%s)" -ge "$t_end" ] && break
+    [[ "$(date +%s)" -ge "$t_end" ]] && break
 done
 echo "---  ending swipe  ---"
 
@@ -85,4 +80,4 @@ echo "---  ending swipe  ---"
 # shellcheck disable=SC2154
 echo "Made $x swipe steps in ${duration} seconds"
 
-"$(dirname "$CURRENT_DIR")"/mouse_swipe.tmux  # reset env again
+"$(dirname "$CURRENT_DIR")"/mouse_swipe.tmux # reset env again

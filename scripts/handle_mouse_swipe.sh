@@ -16,7 +16,6 @@ CURRENT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 # shellcheck disable=SC1091
 . "$CURRENT_DIR/utils.sh"
 
-
 #
 #  If you do not want to use a cache file during swipe operations
 #  simplest is to just comment out the entire line, all code checks
@@ -34,19 +33,15 @@ drag_stat_cache_file="/tmp/drag_status_cache"
 #
 benchmarking=0
 
-
-
 action_name="$1"
 mouse_x="$2"
 mouse_y="$3"
-
 
 min_version="3.0"
 
 env_untested="untested"
 env_incompatible="incompatible"
 no_drag=0
-
 
 #
 #  Log if log_lvl <= debug_lvl
@@ -56,10 +51,13 @@ debug() {
     msg="$2"
 
     case "$log_lvl" in
-        (*[!0123456789]*)
-            log_it "ERROR log_lvl [$log_lvl] not an integer value!"
-            exit 1
-            ;;
+    *[!0123456789]*)
+        log_it "ERROR log_lvl [$log_lvl] not an integer value!"
+        exit 1
+        ;;
+
+    *) ;;
+
     esac
 
     #
@@ -67,9 +65,9 @@ debug() {
     #
     #  shellcheck disable=SC2154
     [ "$log_lvl" -le "$debug_lvl" ] && log_it "{$log_lvl} $msg"
-    [ "$log_lvl" -eq 0 ]  && $TMUX_BIN display "$msg"
+    #  shellcheck disable=SC2154
+    [ "$log_lvl" -eq 0 ] && $TMUX_BIN display "$msg"
 }
-
 
 verify_file_writeable() {
     varibale_name="$1"
@@ -84,45 +82,45 @@ verify_file_writeable() {
         exit 1
     fi
 
-    file_dir="$( dirname "$fname")"
-    if ! mkdir -p "$file_dir" 2> /dev/null ; then
+    file_dir="$(dirname "$fname")"
+    if ! mkdir -p "$file_dir" 2>/dev/null; then
         echo "ERROR: $varibale_name - Can not create the directory for [$fname]!"
         exit 1
     fi
 
-    if ! touch "$fname" 2> /dev/null; then
+    if ! touch "$fname" 2>/dev/null; then
         echo "ERROR: $varibale_name - Can not create the file [$fname]!"
         exit 1
     fi
 }
-
 
 param_checks() {
     #
     #  Param check
     #
     case "$benchmarking" in
-        (*[!01]*)
-            echo "ERROR bench marking [$benchmarking] must be 0 or 1!"
-            exit 1
-            ;;
+    *[!01]*)
+        echo "ERROR bench marking [$benchmarking] must be 0 or 1!"
+        exit 1
+        ;;
+    *) ;;
     esac
 
     case "$debug_lvl" in
-        (*[!0123456789]*)
-            echo "ERROR debug_lvl [$debug_lvl] not an integer value!"
-            exit 1
-            ;;
+    *[!0123456789]*)
+        echo "ERROR debug_lvl [$debug_lvl] not an integer value!"
+        exit 1
+        ;;
+    *) ;;
     esac
 
     [ -n "$drag_stat_cache_file" ] && verify_file_writeable \
-        drag_stat_cache_file  "$drag_stat_cache_file"
+        drag_stat_cache_file "$drag_stat_cache_file"
     [ -n "$log_file" ] && verify_file_writeable \
-        log_file  "$log_file"
+        log_file "$log_file"
 
     echo "Completed parameters check"
 }
-
 
 drag_status_set() {
     status="$1"
@@ -131,7 +129,7 @@ drag_status_set() {
     debug 3 "drag_status_set($status, $push_it)"
     if [ -n "$drag_stat_cache_file" ]; then
         debug 4 "writing [$status] to $drag_stat_cache_file"
-        if ! echo "$status" > $drag_stat_cache_file; then
+        if ! echo "$status" >$drag_stat_cache_file; then
             echo "ERROR! cant write to drag_stat_cache_file [$drag_stat_cache_file]!"
             exit 1
         fi
@@ -144,7 +142,6 @@ drag_status_set() {
         $TMUX_BIN set-option -g @mouse_drag_status "$status"
     fi
 }
-
 
 drag_status_get() {
 
@@ -159,7 +156,6 @@ drag_status_get() {
         debug 4 "< drag_status_get: prel[$ds_prel] status[$drag_status]"
     fi
 }
-
 
 incompatible_env() {
     msg="$1"
@@ -178,7 +174,6 @@ incompatible_env() {
     echo "$msg"
 }
 
-
 env_check() {
     debug 3 "env_check()"
     vers="$($TMUX_BIN -V | cut -d' ' -f 2)"
@@ -195,10 +190,10 @@ env_check() {
             drag_status_set $drag_status 1
             return
         fi
-        if  expr "'$vers" \< "'3.0"   > /dev/null ; then
+        if expr "'$vers" \< "'3.0" >/dev/null; then
             incompatible_env "vers < 3.0 no mouse_x / mouse_y support, so this utility can not work properly"
         fi
-        if  expr "'$vers" \< "'$min_version"   > /dev/null ; then
+        if expr "'$vers" \< "'$min_version" >/dev/null; then
             incompatible_env "$TMUX_BIN $vers < min vers: $min_version"
             clear_status
             exit 0
@@ -209,21 +204,22 @@ env_check() {
     fi
 }
 
-
 handle_up() {
     debug 3 "handle_up($mouse_x, $mouse_y)"
 
     case "$drag_status" in
 
-        "$env_incompatible" )
-            return
+    "$env_incompatible")
+        return
+        ;;
+    *) ;;
     esac
 
     org_mouse_x="${drag_status%%-*}"
     org_mouse_y="${drag_status#*-}"
 
-    diff_x=$(( mouse_x - org_mouse_x ))
-    diff_y=$(( mouse_y - org_mouse_y ))
+    diff_x=$((mouse_x - org_mouse_x))
+    diff_y=$((mouse_y - org_mouse_y))
 
     # get abs of diffs
     abs_x=${diff_x#-}
@@ -231,10 +227,10 @@ handle_up() {
 
     debug 2 "diff abs: [$abs_x][$abs_y] rel: [$diff_x][$diff_y]"
 
-    if [ $(( abs_x + abs_y )) -eq 0 ]; then  # no movement
+    if [ $((abs_x + abs_y)) -eq 0 ]; then # no movement
         debug 0 "$plugin_name: Did not detect any movement!"
 
-    elif [ "$abs_x" -gt "$abs_y" ] ; then    # Horizontal swipe
+    elif [ "$abs_x" -gt "$abs_y" ]; then # Horizontal swipe
         if [ "$($TMUX_BIN list-windows -F '#{window_id}' | wc -l)" -lt 2 ]; then
             debug 0 "$plugin_name: Only one window, can't switch!"
             return
@@ -246,10 +242,10 @@ handle_up() {
             [ "$benchmarking" -eq 0 ] && $TMUX_BIN select-window -p
         fi
 
-    elif [ "$abs_x" -eq "$abs_y" ] ; then    # Unclear direction
+    elif [ "$abs_x" -eq "$abs_y" ]; then # Unclear direction
         debug 0 "$plugin_name: equal horizontal and vertical movement, direction unclear!"
 
-    else                                     # Vertical swipe
+    else # Vertical swipe
         if [ "$($TMUX_BIN list-sessions | wc -l)" -lt "2" ]; then
             debug 0 "$plugin_name: Only one session, can't switch!"
             return
@@ -262,7 +258,6 @@ handle_up() {
         fi
     fi
 }
-
 
 clear_status() {
     debug 5 "clear_status()"
@@ -278,7 +273,6 @@ clear_status() {
     debug 9 ""
 }
 
-
 remove_cache() {
     debug 5 "remove_cache()"
     if [ -n "$drag_stat_cache_file" ] && [ -f "$drag_stat_cache_file" ]; then
@@ -286,7 +280,6 @@ remove_cache() {
         rm "$drag_stat_cache_file"
     fi
 }
-
 
 main() {
     debug 9 "$plugin_name called - parameters: [$action_name] [$mouse_x] [$mouse_y]"
@@ -297,25 +290,26 @@ main() {
 
     case "$drag_status" in
 
-        "$env_untested" | "")
-            env_check
-            ;;
+    "$env_untested" | "")
+        env_check
+        ;;
 
-        "$env_incompatible")
-            debug 0 "$plugin_name ERROR: incompatible env!"
-            clear_status
-            exit 0
+    "$env_incompatible")
+        debug 0 "$plugin_name ERROR: incompatible env!"
+        clear_status
+        exit 0
+        ;;
+    *) ;;
     esac
 
     debug 9 "verified drag_status [$drag_status]"
     if [ "$action_name" = "down" ] && [ "$drag_status" = "$no_drag" ]; then
-        drag_status_set "$mouse_x-$mouse_y"  #  Start drag detected
+        drag_status_set "$mouse_x-$mouse_y" #  Start drag detected
     elif [ "$action_name" = "up" ]; then
         handle_up
         clear_status
     fi
 }
-
 
 #================================================================
 #
@@ -324,22 +318,21 @@ main() {
 
 case "$action_name" in
 
-    "down" | "up" ) main ;;
+"down" | "up") main ;;
 
-    "paramcheck" ) param_checks ;;
+"paramcheck") param_checks ;;
 
-    *)  echo
-        echo "ERROR: bad param! [$action_name]"
-        echo
-        echo "Valid parameters:"
-        echo "  paramcheck  ensures all used settings are valid"
-        echo
-        echo "  down / up   Normal plugin usage"
-        echo
-        exit 1
-        ;;
+*)
+    echo
+    echo "ERROR: bad param! [$action_name]"
+    echo
+    echo "Valid parameters:"
+    echo "  paramcheck  ensures all used settings are valid"
+    echo
+    echo "  down / up   Normal plugin usage"
+    echo
+    exit 1
+    ;;
 esac
 
 exit 0
-
-

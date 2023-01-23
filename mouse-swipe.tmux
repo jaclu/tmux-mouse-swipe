@@ -24,7 +24,7 @@ get_tmux_option() {
     gtm_option=$1
     gtm_default=$2
     gtm_value=$($TMUX_BIN show-option -gqv "$gtm_option")
-    if [ -z "$gtm_value" ]; then
+    if [[ -z "$gtm_value" ]]; then
         echo "$gtm_default"
     else
         echo "$gtm_value"
