@@ -16,6 +16,10 @@ CURRENT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 # shellcheck disable=SC1091
 . "$CURRENT_DIR/utils.sh"
 
+#
+#  Avoid colliding if more than one tmux-server is running, by
+#  extracting the socket name
+#
 socket_name="$(tmux display -p "#{socket_path}" | sed 's/\// /g' | awk 'NF>1{print $NF}')"
 
 #
