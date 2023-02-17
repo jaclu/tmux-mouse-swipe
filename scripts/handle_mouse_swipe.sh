@@ -1,7 +1,7 @@
 #!/bin/sh
-__version="1.5.2 2022-09-15"
+__version="1.6.0 2023-02-17"
 #
-#   Copyright (c) 2021,2022: Jacob.Lundqvist@gmail.com
+#   Copyright (c) 2021-2023: Jacob.Lundqvist@gmail.com
 #   License: MIT
 #
 #   Part of https://github.com/jaclu/tmux-mouse-swipe
@@ -16,20 +16,23 @@ CURRENT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 # shellcheck disable=SC1091
 . "$CURRENT_DIR/utils.sh"
 
+socket_name="$(tmux display -p "#{socket_path}" | sed 's/\// /g' | awk 'NF>1{print $NF}')"
+
 #
 #  If you do not want to use a cache file during swipe operations
 #  simplest is to just comment out the entire line, all code checks
 #  if variable is defined, before using it.
 #
-#  On my machine using a cache file is approx 20 times faster than storing
+#  On my machine using a cache file is approx 5 times faster than storing
 #  the values inside a tmux variable. You can test it on your system
 #  by running benchmark.sh
 #
-drag_stat_cache_file="/tmp/drag_status_cache"
+drag_stat_cache_file="/tmp/drag_status_cache-$socket_name"
 
 #
-#  set it to 1 if you are running the benchmark script, but be aware
-#  this will prevent any context switches, so should normally always be 0
+#  set it to 1 if you are running the benchmark script, and want to disable
+#  actually doing swipes during the test, but be aware that  this will
+#  prevent any context switches, so should normally always be 0
 #
 benchmarking=0
 
@@ -116,6 +119,12 @@ param_checks() {
 
     [ -n "$drag_stat_cache_file" ] && verify_file_writeable \
         drag_stat_cache_file "$drag_stat_cache_file"
+    if [ -n "$drag_stat_cache_file" ]; then
+        cache_file="$drag_stat_cache_file"
+    else
+        cache_file="Not using a cache-file"
+    fi
+    echo "Drag status cache-file: $cache_file"
     [ -n "$log_file" ] && verify_file_writeable \
         log_file "$log_file"
 
@@ -129,7 +138,7 @@ drag_status_set() {
     debug 3 "drag_status_set($status, $push_it)"
     if [ -n "$drag_stat_cache_file" ]; then
         debug 4 "writing [$status] to $drag_stat_cache_file"
-        if ! echo "$status" >$drag_stat_cache_file; then
+        if ! echo "$status" >"$drag_stat_cache_file"; then
             echo "ERROR! cant write to drag_stat_cache_file [$drag_stat_cache_file]!"
             exit 1
         fi
@@ -147,7 +156,7 @@ drag_status_get() {
 
     debug 5 "drag_status_get($mouse_x, $mouse_y)"
     if [ -n "$drag_stat_cache_file" ] && [ -f "$drag_stat_cache_file" ]; then
-        drag_status="$(cat $drag_stat_cache_file)"
+        drag_status="$(cat "$drag_stat_cache_file")"
         debug 4 "< reading $drag_stat_cache_file, found: $drag_status"
     else
         drag_status="untested"
