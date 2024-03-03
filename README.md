@@ -1,4 +1,4 @@
-# tmux-mouse-swipe
+#tmux-mouse-swipe
 
 Right click and swipe left or right in any pane to switch window in that
 direction or swipe up or down to switch session.
