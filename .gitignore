@@ -2,6 +2,9 @@ private/
 *~
 \#*
 
+.cache.olint
+
+
 ### VisualStudioCode ###
 .vscode/*      # Maybe .vscode/**/* instead - see comments
 !.vscode/settings.json

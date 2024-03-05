@@ -172,7 +172,7 @@ drag_status_get() {
 
 incompatible_env() {
     msg="$1"
-    if [ "$drag_status" != $env_incompatible ]; then
+    if [ "$drag_status" != "$env_incompatible" ]; then
         echo " "
         #  shellcheck disable=SC2154
         echo "$plugin_name vers: $__version Detected an incompatible environment, and is now disabled"
@@ -200,7 +200,7 @@ env_check() {
             incompatible_env "Can not detect the running tmux version, this tool needs at least tmux vers: $min_version"
             incompatible_env "Since it can't be detected to not be compatible, it will now be re-activated, but no guarantee anything will work."
             drag_status=$no_drag
-            drag_status_set $drag_status 1
+            drag_status_set "$drag_status" 1
             return
         fi
         if expr "'$vers" \< "'3.0" >/dev/null; then
@@ -213,7 +213,7 @@ env_check() {
         fi
         debug 6 "no env issues found"
         drag_status=$no_drag
-        drag_status_set $drag_status 1
+        drag_status_set "$drag_status" 1
     fi
 }
 

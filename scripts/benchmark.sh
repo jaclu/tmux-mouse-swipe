@@ -69,7 +69,7 @@ t_end="$((t_start + duration))"
 x=0
 while :; do
     x=$((x + 1))
-    $swipe_script down $x 5
+    $swipe_script down "$x" 5
     #
     # Calculating duration and comparing it inside the loop gives something
     # like a 25% overhead, but since it is constant on a given system,
