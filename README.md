@@ -1,4 +1,4 @@
-#tmux-mouse-swipe
+# Tmux-Mouse-Swipe
 
 Right click and swipe left or right in any pane to switch window in that
 direction or swipe up or down to switch session.
@@ -69,8 +69,8 @@ distance is two characters.
 
 ## Not purely vertical / horizontal swipes
 
-If both vertical and horizontal swiping is detected, the axis with the most 
-delta is assumed to be the intended direction. Risk for miss-interpertaion 
+If both vertical and horizontal swiping is detected, the axis with the most
+delta is assumed to be the intended direction. Risk for miss-interpertaion
 is reduced by making a slightly longer swipe.
 
 ## Pane borders
