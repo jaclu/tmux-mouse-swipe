@@ -102,13 +102,15 @@ plugin_name="tmux-mouse-swipe"
 [ -z "$TMUX_BIN" ] && TMUX_BIN="tmux"
 
 TMPDIR="${TMPDIR:-/tmp}"
+TMPDIR="${TMPDIR%/}" # argh on some system TMPDIR incorrectly ends with /
+
 f_drag_stat="$TMPDIR/drag_status_cache-$(id -u)"
 
 #
 #  If log_file is empty or undefined, no logging will occur,
 #  so comment it out for normal usage.
 #
-# log_file="$HOME/tmp/$plugin_name.log"
+log_file="$HOME/tmp/$plugin_name.log"
 
 #
 #  0  Always logged

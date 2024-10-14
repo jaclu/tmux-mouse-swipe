@@ -19,8 +19,6 @@ drag_start_set() {
         echo "ERROR! cant write to f_drag_stat [$f_drag_stat]!"
         exit 1
     fi
-    rm -f "$f_drag_stat"
-
 }
 
 drag_start_get() {
