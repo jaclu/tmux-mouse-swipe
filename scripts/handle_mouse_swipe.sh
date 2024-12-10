@@ -16,7 +16,7 @@ drag_start_set() {
 
     # shellcheck disable=SC2154
     if ! echo "$drag_start" >"$f_drag_stat"; then
-        echo "ERROR! cant write to f_drag_stat [$f_drag_stat]!"
+        echo "ERROR! can't write to f_drag_stat [$f_drag_stat]!"
         exit 1
     fi
 }
