@@ -14,6 +14,7 @@
 #  Log if log_lvl <= debug_lvl
 #
 log_it() {
+    # shellcheck disable=SC2154
     if [ -z "$log_file" ]; then
         return
     fi
