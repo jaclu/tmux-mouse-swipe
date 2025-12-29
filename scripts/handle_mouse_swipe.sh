@@ -122,16 +122,16 @@ d_scripts="$(realpath "$(dirname "$0")")"
 # . /Users/jaclu/git_repos/mine/tmux-mouse-swipe/scripts/utils.sh
 
 case "$action_name" in
-"down" | "up") main ;;
-*)
-    echo
-    echo "${plugin_name} ERROR: bad 1st param! [$action_name]"
-    echo
-    echo "Valid parameters:"
-    echo "  down / up   Normal plugin usage"
-    echo
-    exit 1
-    ;;
+    "down" | "up") main ;;
+    *)
+        echo
+        echo "${plugin_name} ERROR: bad 1st param! [$action_name]"
+        echo
+        echo "Valid parameters:"
+        echo "  down / up   Normal plugin usage"
+        echo
+        exit 1
+        ;;
 esac
 
 exit 0

@@ -63,11 +63,11 @@ param_checks() {
 
     # shellcheck disable=SC2154
     case "$debug_lvl" in
-    *[!0123456789]*)
-        echo "ERROR debug_lvl [$debug_lvl] not an integer value!"
-        exit 1
-        ;;
-    *) ;;
+        *[!0123456789]*)
+            echo "ERROR debug_lvl [$debug_lvl] not an integer value!"
+            exit 1
+            ;;
+        *) ;;
     esac
 
     echo "Drag status cache-file: $f_drag_stat"

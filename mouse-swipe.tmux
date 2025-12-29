@@ -16,17 +16,17 @@ d_plugin="$(realpath "$(dirname "$0")")"
 swipe_script="$d_plugin/scripts/handle_mouse_swipe.sh"
 
 case "$1" in
-paramcheck) param_checks ;;
-"") ;;
-*)
-    echo
-    echo "ERROR: bad param! [$1]"
-    echo
-    echo "Valid parameters:"
-    echo "  paramcheck  ensures all used settings are valid"
-    echo
-    exit 1
-    ;;
+    paramcheck) param_checks ;;
+    "") ;;
+    *)
+        echo
+        echo "ERROR: bad param! [$1]"
+        echo
+        echo "Valid parameters:"
+        echo "  paramcheck  ensures all used settings are valid"
+        echo
+        exit 1
+        ;;
 esac
 
 clear_status
