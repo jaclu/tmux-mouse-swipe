@@ -26,8 +26,15 @@ drag_start_get() {
     if [ -f "$f_drag_stat" ]; then
         drag_start="$(cat "$f_drag_stat")"
     else
-        echo "ERROR! No drag start file: $f_drag_stat"
-        exit 1
+        #
+        #  A drag end can arrive without a recorded drag start, for example
+        #  when the drag began on the status line or a pane border (locations
+        #  this plugin does not bind), or when the cache file was cleared by
+        #  a config reload whilst a drag was in progress. There is nothing
+        #  to act upon, so just ignore it.
+        #
+        log_it 1 "drag end without drag start - ignoring"
+        exit 0
     fi
     org_mouse_x="${drag_start%%-*}"
     org_mouse_y="${drag_start#*-}"
