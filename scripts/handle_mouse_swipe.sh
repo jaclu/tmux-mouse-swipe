@@ -23,7 +23,7 @@ drag_start_get() {
         #  a config reload whilst a drag was in progress. There is nothing
         #  to act upon, so just ignore it.
         #
-        display_msg "Failed to detect prior mouse down"
+        display_msg "Failed to detect prior drag start"
     fi
     org_mouse_x="${drag_start%%-*}"
     org_mouse_y="${drag_start#*-}"
@@ -31,15 +31,15 @@ drag_start_get() {
     log_it 3 "drag_start_get() - X:$org_mouse_x Y:$org_mouse_y"
 }
 
-handle_mouse_down() {
+mouse_drag_start() {
     drag_start="$mouse_x-$mouse_y"
 
     [ -f "$f_drag_start" ] && {
-        log_it 2 "handle_mouse_down($mouse_x, $mouse_y) - repeated call"
+        log_it 2 "mouse_drag_start($mouse_x, $mouse_y) - repeated call"
         return # drag has already started
     }
     log_it 2 " "
-    log_it 3 "handle_mouse_down($mouse_x, $mouse_y)"
+    log_it 3 "mouse_drag_start($mouse_x, $mouse_y)"
 
     # shellcheck disable=SC2154
     echo "$drag_start" >"$f_drag_start" || {
@@ -47,8 +47,8 @@ handle_mouse_down() {
     }
 }
 
-handle_mouse_up() {
-    log_it 3 "handle_mouse_up($mouse_x, $mouse_y)"
+mouse_drag_end() {
+    log_it 3 "mouse_drag_end($mouse_x, $mouse_y)"
 
     drag_start_get
 
@@ -123,9 +123,9 @@ mouse_y="$3"
 
 if [ "$action_name" = "down" ]; then
     [ -f "$f_drag_start" ] && return # dragging has already started
-    handle_mouse_down                #  Start drag detected
+    mouse_drag_start                 #  Start drag detected
 elif [ "$action_name" = "up" ]; then
-    handle_mouse_up
+    mouse_drag_end
     clear_drag_start
 else
     log_it 0 "ERROR: Unknown action: [$action_name]"
