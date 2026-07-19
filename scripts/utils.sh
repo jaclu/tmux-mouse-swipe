@@ -2,7 +2,7 @@
 #  shellcheck disable=SC2034
 #  Directives for shellcheck directly after bang path are global
 #
-#   Copyright (c) 2022,2024: Jacob.Lundqvist@gmail.com
+#   Copyright (c) 2022,2024,2026: Jacob.Lundqvist@gmail.com
 #   License: MIT
 #
 #   Part of https://github.com/jaclu/tmux-menus
