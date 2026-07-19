@@ -94,6 +94,11 @@ Every little bit helps, and credit will always be given.
 The best way to send feedback is to file an issue at
 [tmux-mouse-swipe/issues](https://github.com/jaclu/tmux-mouse-swipe/issues)
 
+## Acknowledgments
+
+[RaviTharuma](https://github.com/RaviTharuma) - Submitted a patch handling the case when
+drag start was not detected
+
 ### License
 
 [MIT](LICENSE.md)
