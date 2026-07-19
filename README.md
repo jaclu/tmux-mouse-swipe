@@ -18,7 +18,8 @@ performance boost not having to repeatedly start bash scripts.
 
 ## Recent Changes
 
-- If the drag start was not detected a notification will be displayed
+- Added notifications when drag start was missed and when a cchange can't be made
+  due to only one Window/Session
 - Code cleanup
 
 ## Installation
