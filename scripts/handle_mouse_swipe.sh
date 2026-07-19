@@ -16,7 +16,13 @@ drag_start_get() {
             err_msg "Can't read f_drag_start: $f_drag_start"
         }
     else
-        # no drag start detected, abort via notification
+        #
+        #  A drag end can arrive without a recorded drag start, for example
+        #  when the drag began on the status line or a pane border (locations
+        #  this plugin does not bind), or when the cache file was cleared by
+        #  a config reload whilst a drag was in progress. There is nothing
+        #  to act upon, so just ignore it.
+        #
         display_msg "Failed to detect prior mouse down"
     fi
     org_mouse_x="${drag_start%%-*}"
