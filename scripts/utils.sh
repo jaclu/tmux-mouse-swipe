@@ -88,7 +88,6 @@ param_checks() {
         }
     }
     [ -n "$verbose" ] && printf '\nCompleted parameters check for: %s\n' "$plugin_name"
-    exit_cleanup
 }
 
 #===============================================================
