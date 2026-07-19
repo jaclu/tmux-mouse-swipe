@@ -26,8 +26,10 @@ drag_start_get() {
     if [ -f "$f_drag_stat" ]; then
         drag_start="$(cat "$f_drag_stat")"
     else
-        echo "ERROR! No drag start file: $f_drag_stat"
-        exit 1
+        # no drag start detected, abort via notification
+        # shellcheck disable=SC2154 # plugin_name defined n utils.sh
+        $TMUX_BIN display "$plugin_name: Failed to detect mouse down"
+        exit 0
     fi
     org_mouse_x="${drag_start%%-*}"
     org_mouse_y="${drag_start#*-}"

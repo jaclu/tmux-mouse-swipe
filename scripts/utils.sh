@@ -28,7 +28,7 @@ log_it() {
 
 clear_status() {
     log_it 4 "clear_status()"
-    rm -f "$f_drag_stat"
+    [ -n "$f_drag_stat" ] && rm -f "$f_drag_stat"
 }
 
 verify_file_writeable() {
