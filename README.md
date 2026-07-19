@@ -16,6 +16,11 @@ The reason I wrote it as a posix script is that since it gets run multiple
 times in quick sequence, on my iPad running iSH, there is a noticeable
 performance boost not having to repeatedly start bash scripts.
 
+## Recent Changes
+
+- If the drag start was not detected a notification will be displayed
+- Code cleanup
+
 ## Installation
 
 Comparability: tmux version 3.0 or higher
@@ -55,8 +60,8 @@ tmux source-file ~/.tmux.conf
 Once installed, try pressing down right button and swipe up, down, left
 or right on any pane.
 
-Once you release the button, tmux should switch window after horizontal
-swipe and session after vertical.
+Once you release the button, tmux should switch window after (mostly) horizontal
+swipe and session after (mostly) vertical.
 
 If you only have one Window or Session, a message will be displayed
 that the requested action can not be performed, depending on swipe direction.
@@ -93,6 +98,11 @@ Every little bit helps, and credit will always be given.
 
 The best way to send feedback is to file an issue at
 [tmux-mouse-swipe/issues](https://github.com/jaclu/tmux-mouse-swipe/issues)
+
+## Acknowledgments
+
+[RaviTharuma](https://github.com/RaviTharuma) - Submitted a patch handling the case
+when drag start was not detected
 
 ### License
 

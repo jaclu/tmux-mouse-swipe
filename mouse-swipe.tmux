@@ -16,20 +16,25 @@ d_plugin="$(realpath "$(dirname "$0")")"
 swipe_script="$d_plugin/scripts/handle_mouse_swipe.sh"
 
 case "$1" in
-    paramcheck) param_checks ;;
+    paramcheck)
+        param_checks -v
+        exit_cleanup
+        ;;
     "") ;;
     *)
-        echo
-        echo "ERROR: bad param! [$1]"
-        echo
-        echo "Valid parameters:"
-        echo "  paramcheck  ensures all used settings are valid"
-        echo
+        {
+            echo
+            echo "ERROR: bad option! [$1]"
+            echo
+            echo "Valid options:"
+            echo "  paramcheck  Display settings"
+            echo
+        } >/dev/stderr
         exit 1
         ;;
 esac
 
-clear_status
+param_checks
 
 #
 #  This normally triggers the right click default popups, they don't
@@ -45,3 +50,4 @@ $TMUX_BIN unbind-key -n MouseDown3Pane
 #
 $TMUX_BIN bind-key -n MouseDrag3Pane run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
 $TMUX_BIN bind-key -n MouseDragEnd3Pane run "$swipe_script up   '#{mouse_x}' '#{mouse_y}'"
+exit_cleanup

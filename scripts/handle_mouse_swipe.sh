@@ -9,27 +9,15 @@
 #   defined in mouse_swipe.tmux
 #
 
-drag_start_set() {
-    drag_start="$mouse_x-$mouse_y"
-
-    log_it 3 "drag_start_set($drag_start)"
-
-    # shellcheck disable=SC2154
-    if ! echo "$drag_start" >"$f_drag_stat"; then
-        echo "ERROR! can't write to f_drag_stat [$f_drag_stat]!"
-        exit 1
-    fi
-}
-
 drag_start_get() {
-
-    if [ -f "$f_drag_stat" ]; then
-        drag_start="$(cat "$f_drag_stat")"
+    # shellcheck disable=SC2154 # f_drag_start defined in utils.sh
+    if [ -f "$f_drag_start" ]; then
+        drag_start="$(cat "$f_drag_start")" || {
+            err_msg "Can't read f_drag_start: $f_drag_start"
+        }
     else
         # no drag start detected, abort via notification
-        # shellcheck disable=SC2154 # plugin_name defined n utils.sh
-        $TMUX_BIN display "$plugin_name: Failed to detect mouse down"
-        exit 0
+        display_msg "Failed to detect prior mouse down"
     fi
     org_mouse_x="${drag_start%%-*}"
     org_mouse_y="${drag_start#*-}"
@@ -37,8 +25,24 @@ drag_start_get() {
     log_it 3 "drag_start_get() - X:$org_mouse_x Y:$org_mouse_y"
 }
 
-handle_up() {
-    log_it 3 "handle_up($mouse_x, $mouse_y)"
+handle_mouse_down() {
+    drag_start="$mouse_x-$mouse_y"
+
+    [ -f "$f_drag_start" ] && {
+        log_it 2 "handle_mouse_down($mouse_x, $mouse_y) - repeated call"
+        return # drag has already started
+    }
+    log_it 2 " "
+    log_it 3 "handle_mouse_down($mouse_x, $mouse_y)"
+
+    # shellcheck disable=SC2154
+    echo "$drag_start" >"$f_drag_start" || {
+        err_msg "Can't write to f_drag_start: $f_drag_start"
+    }
+}
+
+handle_mouse_up() {
+    log_it 3 "handle_mouse_up($mouse_x, $mouse_y)"
 
     drag_start_get
 
@@ -58,7 +62,7 @@ handle_up() {
     elif [ "$abs_x" -gt "$abs_y" ]; then # Horizontal swipe
         # shellcheck disable=SC2154
         if [ "$($TMUX_BIN list-windows -F '#{window_id}' | wc -l)" -lt 2 ]; then
-            log_it 0 "$plugin_name: Only one window, can't switch!"
+            display_msg "Only one Window, can't switch!"
             return
         elif [ "$mouse_x" -gt "$org_mouse_x" ]; then
             log_it 1 "will switch to the right"
@@ -73,7 +77,7 @@ handle_up() {
 
     else # Vertical swipe
         if [ "$($TMUX_BIN list-sessions | wc -l)" -lt "2" ]; then
-            log_it 0 "$plugin_name: Only one session, can't switch!"
+            display_msg "Only one Session, can't switch!"
             return
         elif [ "$mouse_y" -gt "$org_mouse_y" ]; then
             log_it 1 "will switch to next session"
@@ -82,20 +86,6 @@ handle_up() {
             log_it 1 "will switch to previous session"
             $TMUX_BIN switch-client -p
         fi
-    fi
-}
-
-main() {
-    # log_it 1 "$plugin_name called - parameters: [$action_name] [$mouse_x] [$mouse_y]"
-
-    if [ "$action_name" = "down" ]; then
-        [ -f "$f_drag_stat" ] && return # dragging has already started
-        drag_start_set                  #  Start drag detected
-    elif [ "$action_name" = "up" ]; then
-        handle_up
-        clear_status
-    else
-        log_it 0 "${plugin_name} ERROR: Unknown action: [$action_name]"
     fi
 }
 
@@ -111,29 +101,37 @@ main() {
 #
 # socket_name="$(tmux display -p "#{socket_path}" | sed 's/\// /g' | awk 'NF>1{print $NF}')"
 
-action_name="$1"
-mouse_x="$2"
-mouse_y="$3"
-
 # shellcheck disable=SC1007
 d_scripts="$(realpath "$(dirname "$0")")"
 
 # shellcheck source=/dev/null
 . "$d_scripts"/utils.sh
 
-# . /Users/jaclu/git_repos/mine/tmux-mouse-swipe/scripts/utils.sh
+action_name="$1"
+mouse_x="$2"
+mouse_y="$3"
 
-case "$action_name" in
-    "down" | "up") main ;;
-    *)
+[ -n "$action_name" ] || err_msg "$0: No action_name param"
+[ -n "$mouse_x" ] || err_msg "$0: No mouse_x param"
+[ -n "$mouse_y" ] || err_msg "$0: No mouse_y param"
+
+if [ "$action_name" = "down" ]; then
+    [ -f "$f_drag_start" ] && return # dragging has already started
+    handle_mouse_down                #  Start drag detected
+elif [ "$action_name" = "up" ]; then
+    handle_mouse_up
+    clear_drag_start
+else
+    log_it 0 "ERROR: Unknown action: [$action_name]"
+    {
         echo
         echo "${plugin_name} ERROR: bad 1st param! [$action_name]"
         echo
         echo "Valid parameters:"
         echo "  down / up   Normal plugin usage"
         echo
-        exit 1
-        ;;
-esac
+    } >/dev/stderr
+    exit_cleanup 1
+fi
 
 exit 0
