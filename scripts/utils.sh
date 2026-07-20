@@ -35,12 +35,18 @@ log_it() {
     #  Log if log_lvl <= debug_lvl
 
     [ -n "$log_file" ] || return # no log file being used
-    log_lvl="$1"
-    msg="$2"
-    [ -n "$msg" ] || err_msg "log_it() - Call without msg param"
-    [ "$log_lvl" -gt "$debug_lvl" ] && return
+    _li_this_lvl="$1"
 
-    printf "[%s] [%s] %s\n" "$(date '+%H:%M:%S')" "$log_lvl" "$msg" >>"$log_file"
+    case "$_li_this_lvl" in
+        *[!0123456789]*) err_msg "Not an integer value: log_lvl: [$_li_this_lvl]" ;;
+        *) ;;
+    esac
+
+    _li_msg="$2"
+    [ -n "$_li_msg" ] || err_msg "log_it($1, $2) - Call without msg param"
+    [ "$_li_this_lvl" -gt "$debug_lvl" ] && return
+
+    printf "[%s] [%s] %s\n" "$(date '+%H:%M:%S')" "$_li_this_lvl" "$_li_msg" >>"$log_file"
 }
 
 clear_drag_start() {
