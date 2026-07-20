@@ -16,8 +16,8 @@ exit_cleanup() {
 }
 
 err_msg() {
-    msg="$plugin_name - ERROR: $1"
-    printf '\n%s\n' "$msg" >/dev/stderr
+    # Also called from log_it, so no call back, to avoid potential infinete recursiopn
+    printf '\n%s - ERROR: %s\n' "$plugin_name" "$1"
     exit_cleanup 1
 }
 
