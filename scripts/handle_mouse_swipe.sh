@@ -133,21 +133,23 @@ mouse_y="$3"
 
 param_validation
 
-if [ "$action_name" = "down" ]; then
-    [ -f "$f_drag_start" ] && return # dragging has already started
-    mouse_drag_start                 #  Start drag detected
-elif [ "$action_name" = "up" ]; then
-    mouse_drag_end
-    clear_drag_start
-else
-    log_it 0 "ERROR: Unknown action: [$action_name]"
-    echo
-    echo "${plugin_name} ERROR: bad 1st param! [$action_name]"
-    echo
-    echo "Valid parameters:"
-    echo "  down / up   Normal plugin usage"
-    echo
-    exit_cleanup 1
-fi
+case "$action_name" in
+    down)
+        [ -f "$f_drag_start" ] && return # dragging has already started
+        log_it 1 " "                     # blank line to separate swipes
+        mouse_drag_start                 #  Start drag detected
+        ;;
+    up) mouse_drag_end ;;
+    *)
+        log_it 0 "ERROR: Unknown action: [$action_name]"
+        echo
+        echo "${plugin_name} ERROR: bad 1st param! [$action_name]"
+        echo
+        echo "Valid parameters:"
+        echo "  down / up   Normal plugin usage"
+        echo
+        exit_cleanup 1
+        ;;
+esac
 
 exit 0
