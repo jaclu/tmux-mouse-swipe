@@ -41,7 +41,6 @@ mouse_drag_start() {
     log_it 2 " "
     log_it 3 "mouse_drag_start($mouse_x, $mouse_y)"
 
-    # shellcheck disable=SC2154
     echo "$drag_start" >"$f_drag_start" || {
         err_msg "Can't write to f_drag_start: $f_drag_start"
     }
@@ -107,7 +106,6 @@ mouse_drag_end() {
 #
 # socket_name="$(tmux display -p "#{socket_path}" | sed 's/\// /g' | awk 'NF>1{print $NF}')"
 
-# shellcheck disable=SC1007
 d_scripts="$(realpath "$(dirname "$0")")"
 
 # shellcheck source=/dev/null

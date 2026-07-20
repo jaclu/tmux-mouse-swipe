@@ -10,7 +10,6 @@
 
 d_plugin="$(realpath "$(dirname "$0")")"
 
-# shellcheck source=/dev/null
 . "$d_plugin/scripts/utils.sh"
 
 swipe_script="$d_plugin/scripts/handle_mouse_swipe.sh"

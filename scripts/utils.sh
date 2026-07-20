@@ -1,6 +1,4 @@
 #!/bin/sh
-#  shellcheck disable=SC2034
-#  Directives for shellcheck directly after bang path are global
 #
 #   Copyright (c) 2022,2024,2026: Jacob.Lundqvist@gmail.com
 #   License: MIT
@@ -36,7 +34,6 @@ display_msg() {
 log_it() {
     #  Log if log_lvl <= debug_lvl
 
-    # shellcheck disable=SC2154
     [ -n "$log_file" ] || return # no log file being used
     log_lvl="$1"
     msg="$2"
@@ -74,7 +71,6 @@ param_checks() {
 
     [ -n "$plugin_name" ] || err_msg "Variable not defined: plugin_name"
 
-    # shellcheck disable=SC2154
     case "$debug_lvl" in
         *[!0123456789]*) err_msg "Not an integer value: debug_lvl: [$debug_lvl]" ;;
         *) ;;
