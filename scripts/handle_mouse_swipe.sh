@@ -94,6 +94,22 @@ mouse_drag_end() {
     fi
 }
 
+param_validation() {
+    # log_it 5 "><> action_name[$action_name] mouse_x[$mouse_x] mouse_y[$mouse_y]"
+    [ -n "$action_name" ] || err_msg "$0: No action_name param"
+    [ -z "$mouse_x" ] && [ -z "$mouse_y" ] && {
+        #
+        # This can happen if the swipe crossed into another pane
+        # Just ignore it  and reset the swipe
+        #
+        log_it 0 "X and Y missing"
+        exit_cleanup 0
+    }
+
+    [ -n "$mouse_x" ] || err_msg "No mouse_x param"
+    [ -n "$mouse_y" ] || err_msg "No mouse_y param"
+}
+
 #===============================================================
 #
 #   Main
@@ -115,9 +131,7 @@ action_name="$1"
 mouse_x="$2"
 mouse_y="$3"
 
-[ -n "$action_name" ] || err_msg "$0: No action_name param"
-[ -n "$mouse_x" ] || err_msg "$0: No mouse_x param"
-[ -n "$mouse_y" ] || err_msg "$0: No mouse_y param"
+param_validation
 
 if [ "$action_name" = "down" ]; then
     [ -f "$f_drag_start" ] && return # dragging has already started
