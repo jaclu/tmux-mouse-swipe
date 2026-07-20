@@ -9,8 +9,9 @@
 #
 
 exit_cleanup() {
-    # Cleanup then exit, if ex_code was given, terminate as an error
+    # Cleanup then exit, if no x_code was given, use 0 as default
     ex_code="${1:-0}"
+
     clear_drag_start
     exit "$ex_code"
 }
@@ -22,28 +23,32 @@ err_msg() {
 }
 
 display_msg() {
-    # Friendly exit, display message on status-bar, then exit 0 in order not to
+    # Display message on status-bar, then exit 0 in order not to
     # cause tmux to display a separate error about exit code not being 0
     msg="$1"
+
+    log_it 0 "display_msg: $msg"
     [ -n "$msg" ] || err_msg "display_msg() - No param"
-    log_it - "$msg"
-    $TMUX_BIN display-message "$plugin_name: $msg"
+    $TMUX_BIN display-message "$plugin_name: $msg" || {
+        ex_code="$?"
+        err_msg "display-message error: $ex_code"
+    }
     exit_cleanup
 }
 
 log_it() {
     #  Log if log_lvl <= debug_lvl
+    _li_this_lvl="$1"
+    _li_msg="$2"
 
     [ -n "$log_file" ] || return # no log file being used
-    _li_this_lvl="$1"
 
     case "$_li_this_lvl" in
         *[!0123456789]*) err_msg "Not an integer value: log_lvl: [$_li_this_lvl]" ;;
         *) ;;
     esac
 
-    _li_msg="$2"
-    [ -n "$_li_msg" ] || err_msg "log_it($1, $2) - Call without msg param"
+    [ -n "$_li_msg" ] || err_msg "log_it - Call without msg param"
     [ "$_li_this_lvl" -gt "$debug_lvl" ] && return
 
     printf "[%s] [%s] %s\n" "$(date '+%H:%M:%S')" "$_li_this_lvl" "$_li_msg" >>"$log_file"
@@ -66,7 +71,7 @@ verify_file_writeable() {
     touch "$fname" 2>/dev/null || err_msg "Unable to write to: $fname"
 }
 
-param_checks() {
+config_check() {
     #
     #  Config check, if $1 is set, display variables
     #
@@ -125,7 +130,7 @@ f_drag_start="$TMPDIR/drag_status_cache-$(id -u)"
 #  If log_file is empty or undefined, no logging will occur,
 #  so comment it out for normal usage.
 #
-# log_file="$HOME/tmp/$plugin_name.log"
+# log_file="$HOME/tmp/${plugin_name}.log"
 
 #
 #  Notification types logged
@@ -135,5 +140,6 @@ f_drag_start="$TMPDIR/drag_status_cache-$(id -u)"
 #  2  Display final movement detected
 #  3  Display mouse locations start/stop drag
 #  4  Display clear status
+#  5  Display params
 #
-debug_lvl=9
+debug_lvl=3

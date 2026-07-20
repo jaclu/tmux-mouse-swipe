@@ -28,26 +28,26 @@ drag_start_get() {
     org_mouse_x="${drag_start%%-*}"
     org_mouse_y="${drag_start#*-}"
 
-    log_it 3 "drag_start_get() - X:$org_mouse_x Y:$org_mouse_y"
+    log_it 3 "drag_start_get()   - X:$org_mouse_x Y:$org_mouse_y"
 }
 
 mouse_drag_start() {
     drag_start="$mouse_x-$mouse_y"
 
+    log_it 3 "mouse_drag_start() - X:$mouse_x Y:$mouse_y"
     [ -f "$f_drag_start" ] && {
-        log_it 2 "mouse_drag_start($mouse_x, $mouse_y) - repeated call"
-        return # drag has already started
+        # drag has already started
+        log_it 1 "  mouse_drag_start($mouse_x, $mouse_y) - repeated call"
+        exit 0
     }
-    log_it 2 " "
-    log_it 3 "mouse_drag_start($mouse_x, $mouse_y)"
-
     echo "$drag_start" >"$f_drag_start" || {
         err_msg "Can't write to f_drag_start: $f_drag_start"
     }
+    exit 0
 }
 
 mouse_drag_end() {
-    log_it 3 "mouse_drag_end($mouse_x, $mouse_y)"
+    log_it 3 "mouse_drag_end()   - X:$mouse_x Y:$mouse_y"
 
     drag_start_get
 
@@ -62,13 +62,12 @@ mouse_drag_end() {
 
     if [ $((abs_x + abs_y)) -eq 0 ]; then # no movement
         # shellcheck disable=SC2154
-        log_it 0 "$plugin_name: Did not detect any movement!"
+        log_it 1 "$plugin_name: Did not detect any movement!"
 
     elif [ "$abs_x" -gt "$abs_y" ]; then # Horizontal swipe
         # shellcheck disable=SC2154
         if [ "$($TMUX_BIN list-windows -F '#{window_id}' | wc -l)" -lt 2 ]; then
             display_msg "Only one Window, can't switch!"
-            return
         elif [ "$mouse_x" -gt "$org_mouse_x" ]; then
             log_it 1 "will switch to the right"
             $TMUX_BIN select-window -n
@@ -78,12 +77,12 @@ mouse_drag_end() {
         fi
 
     elif [ "$abs_x" -eq "$abs_y" ]; then # Unclear direction
-        log_it 0 "$plugin_name: equal horizontal and vertical movement, direction unclear!"
+        log_it 1 "Same horizontal and vertical movement, direction unclear!"
+        display_msg "$plugin_name: Equal X & Y movement - direction unclear"
 
     else # Vertical swipe
         if [ "$($TMUX_BIN list-sessions | wc -l)" -lt "2" ]; then
             display_msg "Only one Session, can't switch!"
-            return
         elif [ "$mouse_y" -gt "$org_mouse_y" ]; then
             log_it 1 "will switch to next session"
             $TMUX_BIN switch-client -n
@@ -95,7 +94,7 @@ mouse_drag_end() {
 }
 
 param_validation() {
-    # log_it 5 "><> action_name[$action_name] mouse_x[$mouse_x] mouse_y[$mouse_y]"
+    log_it 5 "params: action_name[$action_name] mouse_x[$mouse_x] mouse_y[$mouse_y]"
     [ -n "$action_name" ] || err_msg "$0: No action_name param"
     [ -z "$mouse_x" ] && [ -z "$mouse_y" ] && {
         #
@@ -103,7 +102,7 @@ param_validation() {
         # Just ignore it  and reset the swipe
         #
         log_it 0 "X and Y missing"
-        exit_cleanup 0
+        exit_cleanup
     }
 
     [ -n "$mouse_x" ] || err_msg "No mouse_x param"
@@ -122,7 +121,7 @@ param_validation() {
 #
 # socket_name="$(tmux display -p "#{socket_path}" | sed 's/\// /g' | awk 'NF>1{print $NF}')"
 
-d_scripts="$(realpath "$(dirname "$0")")"
+d_scripts=$(cd "${0%/*}" && pwd)
 
 # shellcheck source=/dev/null
 . "$d_scripts"/utils.sh
@@ -136,7 +135,7 @@ param_validation
 case "$action_name" in
     down)
         [ -f "$f_drag_start" ] && return # dragging has already started
-        log_it 1 " "                     # blank line to separate swipes
+        log_it 2 " "                     # blank line to separate swipes
         mouse_drag_start                 #  Start drag detected
         ;;
     up) mouse_drag_end ;;
@@ -152,4 +151,4 @@ case "$action_name" in
         ;;
 esac
 
-exit 0
+exit_cleanup
