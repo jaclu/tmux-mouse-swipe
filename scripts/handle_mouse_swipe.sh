@@ -127,14 +127,12 @@ elif [ "$action_name" = "up" ]; then
     clear_drag_start
 else
     log_it 0 "ERROR: Unknown action: [$action_name]"
-    {
-        echo
-        echo "${plugin_name} ERROR: bad 1st param! [$action_name]"
-        echo
-        echo "Valid parameters:"
-        echo "  down / up   Normal plugin usage"
-        echo
-    } >/dev/stderr
+    echo
+    echo "${plugin_name} ERROR: bad 1st param! [$action_name]"
+    echo
+    echo "Valid parameters:"
+    echo "  down / up   Normal plugin usage"
+    echo
     exit_cleanup 1
 fi
 

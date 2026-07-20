@@ -19,15 +19,14 @@ case "$1" in
         ;;
     "") ;;
     *)
-        {
-            echo
-            echo "ERROR: bad option! [$1]"
-            echo
-            echo "Valid options:"
-            echo "  paramcheck  Display settings"
-            echo
-        } >/dev/stderr
-        exit 1
+        log_it 0 "Bad option [$1]"
+        echo
+        echo "ERROR: bad option! [$1]"
+        echo
+        echo "Valid options:"
+        echo "  paramcheck  Display settings"
+        echo
+        exit_cleanup 1
         ;;
 esac
 
