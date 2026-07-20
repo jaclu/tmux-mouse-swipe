@@ -1,6 +1,4 @@
-#!/usr/bin/env bash
-#  shellcheck disable=SC2154
-#  Directives for shellcheck directly after bang path are global
+#!/bin/sh
 #
 #   Copyright (c) 2021,2024,2026: Jacob.Lundqvist@gmail.com
 #   License: MIT
