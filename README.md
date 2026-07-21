@@ -56,6 +56,13 @@ From the terminal, reload TMUX environment:
 tmux source-file ~/.tmux.conf
 ```
 
+## Configuration options
+
+| Option               | Default             | Description              |
+| -------------------- | ------------------- | ------------------------ |
+| `@mouse_swipe_start` | `MouseDrag3Pane`    | Event starting the swipe |
+| `@mouse_swipe_end`   | `MouseDragEnd3Pane` | Event ending the swipe   |
+
 ## Usage
 
 Once installed, try pressing down right button and swipe up, down, left
@@ -84,13 +91,6 @@ is reduced by making a slightly longer swipe.
 tmux sends mouse coordinates relative to the pane that the mouse is over,
 so if you cross a pane border during the swipe,
 the direction of movement will most likely not be the intended.
-
-## Basic modifications
-
-If you want to bind this to another mouse event, search for the
-MOUSE SUPPORT section in the tmux man page for details on how to bind mouse
-events. Change the binds towards the end of mouse_swipe.tmux in the top directory
-of this repository.
 
 ## Contributing
 
