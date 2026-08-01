@@ -16,9 +16,19 @@ The reason I wrote it as a posix script is that since it gets run multiple
 times in quick sequence, on my iPad running iSH, there is a noticeable
 performance boost not having to repeatedly start bash scripts.
 
+## Recent Changes
+
+- Added notifications when drag start was missed and when a cchange can't be made
+  due to only one Window/Session
+- Code cleanup
+
 ## Installation
 
-Comparability: tmux version 3.0 or higher
+Compatibility
+
+tmux 3.0 mouse_x/mouse_y aren't available before that.
+Modifier-prefixed drag keys (e.g. C-MouseDragPane) need tmux 3.1 — this
+was broken before then.
 
 ### With [Tmux Plugin Manager](https://github.com/tmux-plugins/tpm) (recommended)
 
@@ -50,16 +60,23 @@ From the terminal, reload TMUX environment:
 tmux source-file ~/.tmux.conf
 ```
 
+## Configuration options
+
+| Option               | Default             | Description              |
+| -------------------- | ------------------- | ------------------------ |
+| `@mouse_swipe_start` | `MouseDrag3Pane`    | Event starting the swipe |
+| `@mouse_swipe_end`   | `MouseDragEnd3Pane` | Event ending the swipe   |
+
 ## Usage
 
-Once installed, try pressing down right button and swipe up, down, left
-or right on any pane.
+Once installed, try pressing down right button (plus modifier if defined)
+and swipe up, down, left or right.
 
-Once you release the button, tmux should switch window after horizontal
-swipe and session after vertical.
+Once you release the button, tmux should switch window after (mostly) horizontal
+swipe and session after (mostly) vertical swipe.
 
 If you only have one Window or Session, a message will be displayed
-that the requested action can not be performed, depending on swipe direction.
+that the requested action can not be performed.
 
 ## Minimal movement
 
@@ -73,19 +90,6 @@ If both vertical and horizontal swiping is detected, the axis with the most
 delta is assumed to be the intended direction. Risk for miss-interpertaion
 is reduced by making a slightly longer swipe.
 
-## Pane borders
-
-tmux sends mouse coordinates relative to the pane that the mouse is over,
-so if you cross a pane border during the swipe,
-the direction of movement will most likely not be the intended.
-
-## Basic modifications
-
-If you want to bind this to another mouse event, search for the
-MOUSE SUPPORT section in the tmux man page for details on how to bind mouse
-events. Change the binds towards the end of mouse_swipe.tmux in the top directory
-of this repository.
-
 ## Contributing
 
 Contributions are welcome, and they are greatly appreciated!
@@ -96,8 +100,8 @@ The best way to send feedback is to file an issue at
 
 ## Acknowledgments
 
-[RaviTharuma](https://github.com/RaviTharuma) - Submitted a patch handling the case when
-drag start was not detected
+[RaviTharuma](https://github.com/RaviTharuma) - Submitted a patch handling the case
+when drag start was not detected
 
 ### License
 

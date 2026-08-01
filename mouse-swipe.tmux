@@ -1,40 +1,61 @@
-#!/usr/bin/env bash
-#  shellcheck disable=SC2154
-#  Directives for shellcheck directly after bang path are global
+#!/bin/sh
 #
-#   Copyright (c) 2021,2024: Jacob.Lundqvist@gmail.com
+#   Copyright (c) 2021,2024,2026: Jacob.Lundqvist@gmail.com
 #   License: MIT
 #
 #   Part of https://github.com/jaclu/tmux-mouse-swipe
 #
 
-d_plugin="$(realpath "$(dirname "$0")")"
+tmux_option() {
+    # shellcheck disable=SC2154 # TMUX_BIN defined in script/utils.sh
+    option=$($TMUX_BIN show-option -gqv "$1")
+    fallback="$2"
+    echo "${option:-$fallback}"
+}
+
+#===============================================================
+#
+#   Main
+#
+#===============================================================
+
+d_plugin=$(cd "${0%/*}" && pwd)
+
+swipe_script="$d_plugin/scripts/handle_mouse_swipe.sh"
+
+swipe_start_config="@mouse_swipe_start"
+swipe_end_config="@mouse_swipe_end"
+swipe_start_default="MouseDrag3Pane"
+swipe_end_default="MouseDragEnd3Pane"
 
 # shellcheck source=/dev/null
 . "$d_plugin/scripts/utils.sh"
 
-swipe_script="$d_plugin/scripts/handle_mouse_swipe.sh"
-
 case "$1" in
-    paramcheck) param_checks ;;
+    config)
+        config_check -v
+        exit_cleanup
+        ;;
     "") ;;
     *)
+        log_it 0 "Bad option [$1]"
         echo
-        echo "ERROR: bad param! [$1]"
+        echo "ERROR: bad option! [$1]"
         echo
-        echo "Valid parameters:"
-        echo "  paramcheck  ensures all used settings are valid"
+        echo "Valid options:"
+        echo "  config - Display settings"
         echo
-        exit 1
+        exit_cleanup 1
         ;;
 esac
 
-clear_status
+config_check
 
 #
 #  This normally triggers the right click default popups, they don't
 #  play well when we use right clicks for other purposes.
 #
+# shellcheck disable=SC2154 # TMUX_BIN defined in scripts/utils.sh
 $TMUX_BIN unbind-key -n MouseDown3Pane
 
 #
@@ -43,5 +64,15 @@ $TMUX_BIN unbind-key -n MouseDown3Pane
 #
 #  still by tmux 3.5a it seems Notes can't be assigned to mouse events...
 #
-$TMUX_BIN bind-key -n MouseDrag3Pane run "$swipe_script down '#{mouse_x}' '#{mouse_y}'"
-$TMUX_BIN bind-key -n MouseDragEnd3Pane run "$swipe_script up   '#{mouse_x}' '#{mouse_y}'"
+
+swipe_start_config=$(tmux_option "$swipe_start_config" "$swipe_start_default")
+log_it 0 "swipe-start key: $swipe_start_config"
+swipe_end_config=$(tmux_option "$swipe_end_config" "$swipe_end_default")
+log_it 0 "swipe-end key:   $swipe_end_config"
+
+$TMUX_BIN bind-key -n "$swipe_start_config" \
+    run "$swipe_script down  '#{mouse_x}' '#{mouse_y}' '#{pane_left}' '#{pane_top}'"
+$TMUX_BIN bind-key -n "$swipe_end_config" \
+    run "$swipe_script up '#{mouse_x}' '#{mouse_y}' '#{pane_left}' '#{pane_top}'"
+
+exit_cleanup

@@ -1,8 +1,6 @@
 #!/bin/sh
-#  shellcheck disable=SC2034
-#  Directives for shellcheck directly after bang path are global
 #
-#   Copyright (c) 2022,2024: Jacob.Lundqvist@gmail.com
+#   Copyright (c) 2022,2024,2026: Jacob.Lundqvist@gmail.com
 #   License: MIT
 #
 #   Part of https://github.com/jaclu/tmux-menus
@@ -10,72 +8,98 @@
 #  Common stuff
 #
 
-#
-#  Log if log_lvl <= debug_lvl
-#
+exit_cleanup() {
+    # Cleanup then exit, if no x_code was given, use 0 as default
+    ex_code="${1:-0}"
+
+    clear_drag_start
+    exit "$ex_code"
+}
+
+err_msg() {
+    [ -z "$2" ] && {
+        # if $2 is defined, skip calling log_it, to avoid recursion loops
+        log_it 0 "ERROR: $1"
+    }
+    # Also called from log_it, so no call back, to avoid potential infinete recursiopn
+    printf '\n%s - ERROR: %s\n' "$plugin_name" "$1"
+    exit_cleanup 1
+}
+
+display_msg() {
+    # Display message on status-bar, then exit 0 in order not to
+    # cause tmux to display a separate error about exit code not being 0
+    msg="$1"
+
+    log_it 0 "display_msg: $msg"
+    [ -n "$msg" ] || err_msg "display_msg() - No param"
+    $TMUX_BIN display-message "$plugin_name: $msg" || {
+        ex_code="$?"
+        err_msg "display-message error: $ex_code"
+    }
+    exit_cleanup
+}
+
 log_it() {
-    # shellcheck disable=SC2154
-    if [ -z "$log_file" ]; then
-        return
-    fi
-    log_lvl="$1"
-    msg="$2"
+    #  Log if log_lvl <= debug_lvl
+    #  if err_msg is called, flag it with no-recursion to prevent err_msg calling log_it
+    _li_this_lvl="$1"
+    _li_msg="$2"
 
-    [ "$log_lvl" -gt "$debug_lvl" ] && return
+    [ -n "$log_file" ] || return # no log file being used
 
-    printf "[%s] [%s] %s\n" "$(date '+%H:%M:%S')" "$log_lvl" "$msg" >>"$log_file"
-}
-
-clear_status() {
-    log_it 4 "clear_status()"
-    rm -f "$f_drag_stat"
-}
-
-verify_file_writeable() {
-    varibale_name="$1"
-    fname="$2"
-
-    if [ -z "$fname" ]; then
-        echo "ERROR: verify_file_writeable() - no fname param!"
-        exit 1
-    fi
-    if [ -z "$varibale_name" ]; then
-        echo "ERROR: verify_file_writeable() - no varibale_name param!"
-        exit 1
-    fi
-
-    file_dir="$(dirname "$fname")"
-    if ! mkdir -p "$file_dir" 2>/dev/null; then
-        echo "ERROR: $varibale_name - Can not create the directory for [$fname]!"
-        exit 1
-    fi
-
-    if ! touch "$fname" 2>/dev/null; then
-        echo "ERROR: $varibale_name - Can not create the file [$fname]!"
-        exit 1
-    fi
-}
-
-param_checks() {
-    #
-    #  Param check
-    #
-
-    # shellcheck disable=SC2154
-    case "$debug_lvl" in
-        *[!0123456789]*)
-            echo "ERROR debug_lvl [$debug_lvl] not an integer value!"
-            exit 1
-            ;;
+    case "$_li_this_lvl" in
+        *[!0123456789]*) err_msg "Not an integer value: log_lvl: [$_li_this_lvl]" no-recursion ;;
         *) ;;
     esac
 
-    echo "Drag status cache-file: $f_drag_stat"
-    [ -n "$log_file" ] && verify_file_writeable \
-        log_file "$log_file"
+    [ -n "$_li_msg" ] || err_msg "log_it - Call without msg param" no-recursion
+    [ "$_li_this_lvl" -gt "$debug_lvl" ] && return
 
-    echo "Completed parameters check"
-    exit 0
+    printf "[%s] [%s] %s\n" "$(date '+%H:%M:%S')" "$_li_this_lvl" "$_li_msg" >>"$log_file"
+}
+
+clear_drag_start() {
+    log_it 4 "clear_drag_start()"
+    [ -n "$f_drag_start" ] && {
+        rm -f "$f_drag_start" || err_msg "Failed to remove: $f_drag_start"
+    }
+}
+
+verify_file_writeable() {
+    fname="$1"
+
+    [ -n "$fname" ] || err_msg "verify_file_writeable() - no param"
+
+    d_file="$(dirname "$d_file")"
+    mkdir -p "$d_file" 2>/dev/null || err_msg "Unable to create the directory for: $fname"
+    touch "$fname" 2>/dev/null || err_msg "Unable to write to: $fname"
+}
+
+config_check() {
+    #
+    #  Config check, if $1 is set, display variables
+    #
+    case "$1" in
+        "") verbose="" ;;
+        *) verbose=1 ;;
+    esac
+
+    [ -n "$plugin_name" ] || err_msg "Variable not defined: plugin_name"
+
+    case "$debug_lvl" in
+        *[!0123456789]*) err_msg "Not an integer value: debug_lvl: [$debug_lvl]" ;;
+        *) ;;
+    esac
+
+    [ -n "$verbose" ] && printf 'Drag status cache-file: %s\n' "$f_drag_start"
+    [ -n "$log_file" ] && {
+        verify_file_writeable "$log_file"
+        [ -n "$verbose" ] && {
+            printf '\n\nLog file: %s\nLog lvl:  %s\n' "$log_file" "$debug_lvl"
+        }
+    }
+    [ -n "$verbose" ] && printf '\nCompleted parameters check for: %s\n' "$plugin_name"
 }
 
 #===============================================================
@@ -105,19 +129,23 @@ plugin_name="tmux-mouse-swipe"
 TMPDIR="${TMPDIR:-/tmp}"
 TMPDIR="${TMPDIR%/}" # argh on some system TMPDIR incorrectly ends with /
 
-f_drag_stat="$TMPDIR/drag_status_cache-$(id -u)"
+f_drag_start="$TMPDIR/drag_status_cache-$(id -u)"
 
 #
 #  If log_file is empty or undefined, no logging will occur,
 #  so comment it out for normal usage.
 #
-# log_file="$HOME/tmp/$plugin_name.log"
+log_file="$HOME/tmp/${plugin_name}.log"
 
+#
+#  Notification types logged
 #
 #  0  Always logged
 #  1  Announce action taken after a completed swipe
-#  2  Display final movement
+#  2  Display final movement detected
 #  3  Display mouse locations start/stop drag
 #  4  Display clear status
-#
-debug_lvl=9
+#  5  Display params
+#  6  Notifications
+#  7  Repeated drag starts notice
+debug_lvl=5
