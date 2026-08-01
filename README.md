@@ -26,8 +26,8 @@ performance boost not having to repeatedly start bash scripts.
 
 Compatibility
 
-tmux 3.0 mouse_x/mouse_y aren't available before that.
-Modifier-prefixed drag keys (e.g. C-MouseDragPane) need tmux 3.1 — this
+- tmux 3.0
+- Modifier-prefixed drag keys (e.g. C-MouseDragPane) need tmux 3.1 — this
 was broken before then.
 
 ### With [Tmux Plugin Manager](https://github.com/tmux-plugins/tpm) (recommended)
