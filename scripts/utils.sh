@@ -135,7 +135,7 @@ f_drag_start="$TMPDIR/drag_status_cache-$(id -u)"
 #  If log_file is empty or undefined, no logging will occur,
 #  so comment it out for normal usage.
 #
-log_file="$HOME/tmp/${plugin_name}.log"
+# log_file="$HOME/tmp/${plugin_name}.log"
 
 #
 #  Notification types logged
