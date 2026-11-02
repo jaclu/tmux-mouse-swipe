@@ -49,7 +49,9 @@ log_it() {
     [ -n "$log_file" ] || return # no log file being used
 
     case "$_li_this_lvl" in
-        *[!0123456789]*) err_msg "Not an integer value: log_lvl: [$_li_this_lvl]" no-recursion ;;
+        *[!0123456789]*)
+            err_msg "Not an integer value: log_lvl: [$_li_this_lvl]" no-recursion
+            ;;
         *) ;;
     esac
 
