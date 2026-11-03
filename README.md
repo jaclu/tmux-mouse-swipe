@@ -28,7 +28,7 @@ Compatibility
 
 - tmux 3.0
 - Modifier-prefixed drag keys (e.g. C-MouseDragPane) need tmux 3.1 — this
-was broken before then.
+  was broken before then.
 
 ### With [Tmux Plugin Manager](https://github.com/tmux-plugins/tpm) (recommended)
 
@@ -105,4 +105,4 @@ when drag start was not detected
 
 ### License
 
-[MIT](LICENSE.md)
+[MIT](LICENSE)
